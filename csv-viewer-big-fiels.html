@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Chunker Viewer</title>
+
+  <!-- Meta tags para app móvil -->
+  <meta name="theme-color" content="#01696f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CSV Chunker">
+
+  <!-- Manifest embebido -->
+  <link rel="manifest" href="data:application/json;base64,PD9wcm90b2Mgdj0xLj4KJTY8JTc9JTg9JTk9JTo9JTs9JHo9Jz09Jzw9Jz09Jz09Jz09Jz09Jz09Jz09Jzw9Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jzw9Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jzw9Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09JZ09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09Jz09JBD0">
+
+  <!-- Estilos y HTML de la v6 -->
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+      --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+      --space-12: 3rem; --space-16: 4rem;
+      --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9;
+      --color-surface-offset: #edeae5; --color-border: #d4d1ca; --color-divider: #dcd9d5;
+      --color-text: #28251d; --color-text-muted: #67655f; --color-text-faint: #8e8b84;
+      --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-highlight: #cedcd8;
+      --color-error: #a12c7b; --color-warning: #964219; --color-success: #437a22;
+      --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
+      --shadow-sm: 0 1px 2px rgba(40,37,29,.06); --shadow-md: 0 6px 18px rgba(40,37,29,.08);
+      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      --font-body: Inter, ui-sans-serif, system-ui, sans-serif;
+      --font-display: Inter, ui-sans-serif, system-ui, sans-serif;
+    }
+    [data-theme="dark"] {
+      --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d;
+      --color-surface-offset: #22211f; --color-border: #393836; --color-divider: #262523;
+      --color-text: #cdccca; --color-text-muted: #a9a7a3; --color-text-faint: #7b7975;
+      --color-primary: #4f98a3; --color-primary-hover: #227f8b; --color-primary-highlight: #313b3b;
+      --color-error: #d163a7; --color-warning: #bb653b; --color-success: #6daa45;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,.2); --shadow-md: 0 8px 24px rgba(0,0,0,.32);
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    html{-webkit-text-size-adjust:none;text-size-adjust:none;scroll-behavior:smooth}
+    body{margin:0;min-height:100dvh;background:var(--color-bg);color:var(--color-text);font:400 var(--text-base)/1.6 var(--font-body)}
+    button,input,select{font:inherit;color:inherit}
+    button{cursor:pointer}
+    a{color:inherit;text-decoration:none}
+    .app{max-width:1280px;margin:0 auto;padding:var(--space-4)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-3) 0 var(--space-6)}
+    .brand{display:flex;align-items:center;gap:var(--space-3)}
+    .logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--color-primary),color-mix(in srgb, var(--color-primary) 68%, white));display:grid;place-items:center;color:white;box-shadow:var(--shadow-md)}
+    .logo svg{width:24px;height:24px}
+    h1,h2,h3{margin:0;line-height:1.15;text-wrap:balance}
+    h1{font-family:var(--font-display);font-size:var(--text-xl)}
+    h2{font-size:var(--text-lg)}
+    p{margin:0;color:var(--color-text-muted);max-width:74ch}
+    .theme-btn,.btn{border:1px solid var(--color-border);background:var(--color-surface);border-radius:var(--radius-md);transition:var(--transition);min-height:44px}
+    .theme-btn{width:44px;display:grid;place-items:center}
+    .theme-btn:hover,.btn:hover{background:var(--color-surface-2)}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--space-4)}
+    .panel{background:var(--color-surface);border:1px solid color-mix(in srgb, var(--color-text) 10%, transparent);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)}
+    .panel-inner{padding:var(--space-5)}
+    .hero{display:grid;gap:var(--space-4)}
+    .dropzone{border:1.5px dashed color-mix(in srgb, var(--color-primary) 40%, var(--color-border));background:linear-gradient(180deg,color-mix(in srgb, var(--color-primary-highlight) 40%, var(--color-surface)),var(--color-surface));border-radius:var(--radius-xl);padding:var(--space-6);display:grid;gap:var(--space-4)}
+    .dropzone.drag{border-color:var(--color-primary);background:color-mix(in srgb, var(--color-primary-highlight) 70%, var(--color-surface))}
+    .btn{padding:0 var(--space-4)}
+    .btn-primary{background:var(--color-primary);border-color:var(--color-primary);color:white}
+    .btn-primary:hover{background:var(--color-primary-hover)}
+    .btn-row{display:flex;flex-wrap:wrap;gap:var(--space-3)}
+    .controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-4)}
+    .field{display:grid;gap:var(--space-2)}
+    .field label{font-size:var(--text-sm);color:var(--color-text)}
+    .field input,.field select{width:100%;min-height:44px;border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface-2);padding:0 var(--space-3)}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-3)}
+    .stat{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid color-mix(in srgb, var(--color-text) 8%, transparent)}
+    .stat strong{display:block;font-size:var(--text-lg);color:var(--color-text)}
+    .mini{font-size:var(--text-sm);color:var(--color-text-muted)}
+    .log{white-space:pre-wrap;background:var(--color-surface-2);border:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);border-radius:var(--radius-lg);padding:var(--space-4);max-height:220px;overflow:auto;font-size:var(--text-sm)}
+    .table-wrap{overflow:auto;border-top:1px solid var(--color-divider)}
+    table{width:100%;border-collapse:collapse;font-size:var(--text-sm)}
+    th,td{padding:0.75rem;border-bottom:1px solid var(--color-divider);text-align:left;vertical-align:top}
+    th{position:sticky;top:0;background:var(--color-surface);z-index:1}
+    tbody tr:hover{background:color-mix(in srgb, var(--color-primary-highlight) 30%, transparent)}
+    .pill{display:inline-flex;align-items:center;gap:.5rem;min-height:32px;padding:0 .75rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-text);font-size:var(--text-sm)}
+    .footer-actions{display:flex;flex-wrap:wrap;gap:var(--space-3);padding-top:var(--space-4)}
+    .hint-list{display:grid;gap:var(--space-3);padding-left:1.1rem;margin:0}
+    .muted{color:var(--color-text-muted)}
+    .ok{color:var(--color-success)} .warn{color:var(--color-warning)} .err{color:var(--color-error)}
+    .hidden{display:none!important}
+    .statusbar{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
+    .progress{height:12px;background:var(--color-surface-offset);border-radius:999px;overflow:hidden;border:1px solid color-mix(in srgb, var(--color-text) 8%, transparent)}
+    .progress>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--color-primary),color-mix(in srgb, var(--color-primary) 55%, white));transition:width .15s linear}
+    .searchbar{display:grid;grid-template-columns:1fr;gap:var(--space-3)}
+    .search-row{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-top:var(--space-2)}
+    .sticky-tools{position:sticky;top:0;z-index:4;background:linear-gradient(180deg,var(--color-bg) 78%,transparent);padding-bottom:var(--space-4)}
+    .kbd{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.85em;padding:.1rem .35rem;border:1px solid var(--color-border);border-bottom-width:2px;border-radius:6px;background:var(--color-surface-2)}
+    @media (max-width: 920px){
+      .grid{grid-template-columns:1fr}
+      .stats{grid-template-columns:1fr 1fr}
+      .controls,.searchbar{grid-template-columns:1fr}
+      .topbar{align-items:flex-start;flex-direction:column}
+      .footer-actions{justify-content:flex-start}
+    }
+    @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <a class="sr-only" href="#main">Saltar al contenido</a>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-label="Logo CSV">
+            <path d="M4 6.5h9l2 2H20"></path>
+            <path d="M4 6.5v11A2.5 2.5 0 0 0 6.5 20H17.5A2.5 2.5 0 0 0 20 17.5V8.5"></path>
+            <path d="M8 11.5h8M8 15.5h5"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>CSV Chunker Viewer</h1>
+          <p>Explora CSV gigantes en Android y escritorio: cargando por ventanas, búsqueda global, filtro por una columna y exportación de coincidencias, todo offline y local-first.</p>
+        </div>
+      </div>
+      <button class="btn" id="installBtn">Instalar app</button>
+      <button class="theme-btn" data-theme-toggle aria-label="Cambiar tema" title="Cambiar tema"></button>
+    </header>
+
+    <main id="main" class="grid">
+      <section class="hero panel">
+        <div class="panel-inner">
+          <div class="dropzone" id="dropzone" tabindex="0" aria-label="Zona para soltar archivo CSV">
+            <div>
+              <span class="pill">Offline · Local first · App</span>
+              <h2 style="margin-top:1rem">Carga un CSV o TXT delimitado enorme</h2>
+              <p>Lee por ventanas de bytes, detecta cabecera y busca coincidencias en todo el archivo sin reventar la RAM del móvil ni congelar la UI.</p>
+            </div>
+            <div class="btn-row">
+              <input id="fileInput" type="file" accept=".csv,text/csv,.txt" class="hidden" />
+              <button class="btn btn-primary" id="pickBtn">Elegir archivo</button>
+              <button class="btn" id="loadSampleBtn">Demo interna</button>
+            </div>
+            <div class="mini">Para CSV de varios GB: carga inicial ligera, ventanas ajustables, búsqueda global con límite de filas y exportación de coincidencias.</div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-inner" style="display:grid;gap:1rem">
+          <h2>Modo de uso</h2>
+          <ol class="hint-list muted">
+            <li>Abre el archivo: se detectan tamaño, cabecera y delimitador con una lectura pequeña.</li>
+            <li>Lee ventanas con tamaño configurable y máximo de filas renderizadas.</li>
+            <li>Busca texto simple o filtra por una columna, en la ventana o en todo el archivo, y exporta las coincidencias.</li>
+          </ol>
+          <div class="log" id="log">Esperando archivo…</div>
+        </div>
+      </aside>
+
+      <section class="panel" style="grid-column:1 / -1">
+        <div class="panel-inner sticky-tools">
+          <div class="stats">
+            <div class="stat"><div class="mini">Archivo</div><strong id="fileName">—</strong><div class="mini" id="fileMeta">Sin cargar</div></div>
+            <div class="stat"><div class="mini">Ventana actual</div><strong id="windowInfo">0 B</strong><div class="mini" id="rowInfo">0 filas renderizadas</div></div>
+            <div class="stat"><div class="mini">Cabecera</div><strong id="headerInfo">—</strong><div class="mini" id="delimiterInfo">Delimitador automático</div></div>
+          </div>
+
+          <div class="controls" style="margin-top:1rem">
+            <div class="field"><label for="delimiterSelect">Delimitador</label><select id="delimiterSelect"><option value="auto">Auto</option><option value=",">Coma ,</option><option value=";">Punto y coma ;</option><option value="tab">Tab</option><option value="|">Barra vertical |</option></select></div>
+            <div class="field"><label for="encodingSelect">Decodificación</label><select id="encodingSelect"><option value="utf-8">UTF-8</option><option value="windows-1252">Windows-1252</option><option value="iso-8859-1">ISO-8859-1</option></select></div>
+            <div class="field"><label for="chunkSizeInput">Tamaño ventana lectura (MB)</label><input id="chunkSizeInput" type="number" min="1" max="64" step="1" value="4" /></div>
+            <div class="field"><label for="maxRowsInput">Máx. filas a renderizar / coincidencias</label><input id="maxRowsInput" type="number" min="50" max="2000" step="50" value="200" /></div>
+          </div>
+
+          <div class="footer-actions">
+            <button class="btn" id="readStartBtn">Leer inicio</button>
+            <button class="btn" id="prevBtn">Ventana anterior</button>
+            <button class="btn" id="nextBtn">Ventana siguiente</button>
+            <button class="btn" id="exportWindowBtn">Exportar ventana visible</button>
+            <button class="btn" id="exportMatchesBtn">Exportar coincidencias</button>
+          </div>
+
+          <div style="margin-top:1rem;display:grid;gap:.65rem">
+            <div class="statusbar">
+              <span class="pill" id="statusPill">Sin archivo</span>
+              <span class="mini">Offset actual: <span class="kbd" id="offsetInfo">0</span></span>
+              <span class="mini">Búsqueda global: <span class="kbd" id="searchState">idle</span></span>
+              <span class="mini">Progreso: <span class="kbd" id="progressText">0 %</span></span>
+              <span class="mini">ETA: <span class="kbd" id="etaText">—</span></span>
+            </div>
+            <div class="progress" aria-label="Progreso aproximado"><span id="progressBar"></span></div>
+          </div>
+
+          <div class="searchbar" style="margin-top:1rem">
+            <div class="field">
+              <label for="searchText">Texto de búsqueda (global o ventana)</label>
+              <input id="searchText" type="text" placeholder="Ejemplo: error, id_123, usuario@correo…" />
+            </div>
+            <div class="search-row">
+              <div class="field" style="flex:1 1 180px">
+                <label for="columnSelect">Columna específica (opcional)</label>
+                <select id="columnSelect"><option value="">— ninguna —</option></select>
+              </div>
+              <div class="field" style="flex:1 1 220px">
+                <label>&nbsp;</label>
+                <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+                  <button class="btn" id="searchWindowBtn">Buscar en ventana</button>
+                  <button class="btn" id="searchGlobalBtn">Buscar en todo el archivo</button>
+                  <button class="btn" id="searchCancelBtn">Cancelar búsqueda</button>
+                  <button class="btn" id="searchResetBtn">Reset búsqueda</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table id="resultTable" aria-label="Vista previa CSV">
+            <thead><tr id="theadRow"><th>Sin datos</th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const $ = s => document.querySelector(s);
+      const els = {
+        themeBtn: $('[data-theme-toggle]'), dropzone: $('#dropzone'), fileInput: $('#fileInput'), pickBtn: $('#pickBtn'),
+        loadSampleBtn: $('#loadSampleBtn'), fileName: $('#fileName'), fileMeta: $('#fileMeta'), windowInfo: $('#windowInfo'),
+        rowInfo: $('#rowInfo'), headerInfo: $('#headerInfo'), delimiterInfo: $('#delimiterInfo'), delimiterSelect: $('#delimiterSelect'),
+        encodingSelect: $('#encodingSelect'), chunkSizeInput: $('#chunkSizeInput'), maxRowsInput: $('#maxRowsInput'),
+        readStartBtn: $('#readStartBtn'), prevBtn: $('#prevBtn'), nextBtn: $('#nextBtn'), exportWindowBtn: $('#exportWindowBtn'),
+        exportMatchesBtn: $('#exportMatchesBtn'), statusPill: $('#statusPill'), offsetInfo: $('#offsetInfo'), progressBar: $('#progressBar'),
+        searchState: $('#searchState'), progressText: $('#progressText'), etaText: $('#etaText'),
+        theadRow: $('#theadRow'), tbody: $('#tbody'), log: $('#log'), searchText: $('#searchText'),
+        columnSelect: $('#columnSelect'), searchWindowBtn: $('#searchWindowBtn'), searchGlobalBtn: $('#searchGlobalBtn'),
+        searchCancelBtn: $('#searchCancelBtn'), searchResetBtn: $('#searchResetBtn'), installBtn: $('#installBtn')
+      };
+
+      const state = {
+        file: null,
+        offset: 0,
+        header: null,
+        delimiter: 'auto',
+        lastWindowText: '',
+        lastWindowStart: 0,
+        lastWindowEnd: 0,
+        busy: false,
+        searchAbort: false,
+        lastMatches: [],
+        lastMatchesHeader: null,
+        searchStartTime: 0,
+        deferredPrompt: null
+      };
+
+      function setTheme(next){
+        document.documentElement.setAttribute('data-theme', next);
+        els.themeBtn.innerHTML = next === 'dark'
+          ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+          : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+      }
+      setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      els.themeBtn.addEventListener('click', () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+      function log(msg){
+        const stamp = new Date().toLocaleTimeString();
+        els.log.textContent = `[${stamp}] ${msg}\n` + els.log.textContent;
+      }
+      function fmtBytes(bytes){
+        if (!Number.isFinite(bytes)) return '—';
+        const units = ['B','KB','MB','GB','TB']; let i = 0, n = bytes;
+        while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+        return `${n.toFixed(n >= 100 || i === 0 ? 0 : 1)} ${units[i]}`;
+      }
+      function updateMeta(){
+        if(!state.file){
+          els.fileName.textContent='—'; els.fileMeta.textContent='Sin cargar'; els.windowInfo.textContent='0 B';
+          els.rowInfo.textContent='0 filas renderizadas'; els.headerInfo.textContent='—'; els.offsetInfo.textContent='0';
+          els.progressBar.style.width='0%'; els.statusPill.textContent='Sin archivo'; els.searchState.textContent='idle';
+          els.progressText.textContent='0 %'; els.etaText.textContent='—';
+          return;
+        }
+        els.fileName.textContent = state.file.name || 'archivo virtual';
+        els.fileMeta.textContent = `${fmtBytes(state.file.size)} · ${state.file.type || 'texto plano'}`;
+        els.offsetInfo.textContent = state.offset.toLocaleString('es-ES');
+        const percent = state.file.size ? Math.min(100, (state.lastWindowEnd / state.file.size) * 100) : 0;
+        els.progressBar.style.width = `${percent}%`;
+        els.progressText.textContent = `${percent.toFixed(1)} %`;
+        els.headerInfo.textContent = state.header ? `${state.header.length} columnas` : 'No detectada';
+        els.delimiterInfo.textContent = `Delimitador: ${humanDelimiter(state.delimiter)}`;
+      }
+      function humanDelimiter(d){ return d==='tab' ? 'tab' : d==='auto' ? 'auto' : d || 'auto'; }
+      function setBusy(v, text=''){ state.busy=v; els.statusPill.textContent=text || (v ? 'Procesando…' : 'Listo'); }
+      function parseLine(line, delimiter){
+        const out=[]; let cur=''; let q=false;
+        for(let i=0;i<line.length;i++){
+          const ch=line[i];
+          if(ch=='"'){
+            if(q && line[i+1]=='"'){ cur+='"'; i++; }
+            else q=!q;
+          } else if(ch===delimiter && !q){ out.push(cur); cur=''; }
+          else cur+=ch;
+        }
+        out.push(cur);
+        return out;
+      }
+      function detectDelimiter(sample){
+        const candidates = [',',';','tab','|'];
+        const lines = sample.split(/\r?\n/).filter(Boolean).slice(0, 12);
+        if(!lines.length) return ',';
+        let best = { d:',', score:-1 };
+        for(const d of candidates){
+          const realD = d === 'tab' ? '\t' : d;
+          const counts = lines.map(l => parseLine(l, realD).length);
+          const avg = counts.reduce((a,b)=>a+b,0)/counts.length;
+          const variance = counts.reduce((a,b)=>a+Math.abs(b-avg),0);
+          const score = avg - variance * 0.35;
+          if(score > best.score && avg > 1) best = { d: realD, score };
+        }
+        return best.d;
+      }
+      async function readBlobText(blob, encoding){
+        const buf = await blob.arrayBuffer();
+        return new TextDecoder(encoding, { fatal:false }).decode(buf);
+      }
+
+      async function initFile(file){
+        state.file = file; state.offset = 0; state.header = null; state.lastWindowText=''; state.lastMatches=[]; state.lastMatchesHeader=null;
+        updateMeta(); log(`Archivo cargado: ${file.name} (${fmtBytes(file.size)})`);
+
+        setBusy(true, 'Leyendo cabecera…');
+        els.progressBar.style.width = '5%';
+        els.progressText.textContent = '5 %';
+        try {
+          const headSize = Math.min(16 * 1024, file.size || 0);
+          const headText = await readBlobText(file.slice(0, headSize), els.encodingSelect.value || 'utf-8');
+          const linesHead = headText.split(/\r?\n/).filter(Boolean);
+          const delim = detectDelimiter(linesHead.join('\n'));
+          let header = null;
+          if(linesHead.length) header = parseLine(linesHead[0], delim);
+          state.header = header;
+          state.delimiter = delim;
+          populateColumnSelect();
+          els.progressBar.style.width = '10%';
+          els.progressText.textContent = '10 %';
+          els.statusPill.textContent = 'Cabecera detectada';
+          updateMeta();
+        } catch(err) {
+          els.statusPill.textContent = 'Error en cabecera';
+          log(`Error leyendo cabecera: ${err.message}`);
+        } finally {
+          setBusy(false, els.statusPill.textContent);
+        }
+        setTimeout(() => requestAnimationFrame(() => readWindow(0, false)), 40);
+      }
+
+      function populateColumnSelect(){
+        const select = els.columnSelect;
+        const prev = select.value;
+        select.innerHTML = '<option value="">— ninguna —</option>';
+        if(state.header && state.header.length){
+          state.header.forEach((name, idx) => {
+            const opt = document.createElement('option');
+            opt.value = String(idx);
+            opt.textContent = name || `col_${idx+1}`;
+            select.appendChild(opt);
+          });
+        }
+        if(prev && select.querySelector(`option[value="${prev}"]`)) select.value = prev;
+      }
+
+      async function readWindow(offset = state.offset, resetHeader = false){
+        if(!state.file || state.busy) return;
+        setBusy(true, 'Leyendo ventana…');
+        try{
+          const chunkMB = Math.max(1, Number(els.chunkSizeInput.value) || 4);
+          const maxRows = Math.max(50, Number(els.maxRowsInput.value) || 200);
+          const encoding = els.encodingSelect.value || 'utf-8';
+          const rawDelim = els.delimiterSelect.value;
+          state.delimiter = rawDelim === 'auto' ? 'auto' : rawDelim;
+          const overlap = 64 * 1024;
+          const start = Math.max(0, offset === 0 ? 0 : offset - overlap);
+          const end = Math.min(state.file.size, offset + chunkMB * 1024 * 1024);
+          const text = await readBlobText(state.file.slice(start, end), encoding);
+          let usable = text;
+          if(start > 0){
+            const firstBreak = usable.search(/\r?\n/);
+            usable = firstBreak >= 0 ? usable.slice(firstBreak + 1) : usable;
+          }
+          const lastBreak = usable.lastIndexOf('\n');
+          if(lastBreak > 0) usable = usable.slice(0, lastBreak);
+          state.lastWindowText = usable; state.lastWindowStart = start; state.lastWindowEnd = end; state.offset = offset;
+          if(!usable.trim()) throw new Error('La ventana leída no contiene líneas completas decodificables.');
+          const delim = rawDelim === 'auto' ? detectDelimiter(usable.slice(0, 8000)) : (rawDelim === 'tab' ? '\t' : rawDelim);
+          state.delimiter = delim;
+          let lines = usable.split(/\r?\n/).filter(Boolean);
+          if(resetHeader || !state.header){
+            state.header = parseLine(lines.shift() || '', delim);
+          } else if (offset === 0 && lines.length && state.header?.join('\u0001') === parseLine(lines[0], delim).join('\u0001')) {
+            lines.shift();
+          }
+          const rows = [];
+          for(let i=0;i<lines.length && rows.length<maxRows;i++) rows.push(parseLine(lines[i], delim));
+          renderTable(state.header, rows);
+          els.windowInfo.textContent = `${fmtBytes(end - start)} · ${fmtBytes(start)} → ${fmtBytes(end)}`;
+          els.rowInfo.textContent = `${rows.length.toLocaleString('es-ES')} filas renderizadas`;
+          els.statusPill.textContent = rows.length ? 'Ventana cargada' : 'Ventana vacía';
+          updateMeta();
+          populateColumnSelect();
+          log(`Ventana ${fmtBytes(start)} → ${fmtBytes(end)} leída con delimitador ${humanDelimiter(delim)}. ${rows.length} filas mostradas.`);
+        } catch(err){
+          els.statusPill.textContent = 'Error';
+          log(`Error: ${err.message}`);
+        } finally { setBusy(false, els.statusPill.textContent); }
+      }
+
+      function renderTable(header, rows){
+        els.theadRow.innerHTML=''; els.tbody.innerHTML='';
+        const headers = (header && header.length ? header : ['col_1']);
+        headers.forEach((h, idx) => {
+          const th=document.createElement('th'); th.textContent = h || `col_${idx+1}`; els.theadRow.appendChild(th);
+        });
+        rows.forEach(r => {
+          const tr=document.createElement('tr');
+          headers.forEach((_, idx) => {
+            const td=document.createElement('td'); td.textContent = r[idx] ?? ''; tr.appendChild(td);
+          });
+          els.tbody.appendChild(tr);
+        });
+      }
+
+      function buildPredicate(){
+        const text = (els.searchText.value || '').trim();
+        const colVal = els.columnSelect.value;
+        const colIdx = colVal ? Number(colVal) : null;
+        if(!text && colIdx == null){
+          return null;
+        }
+        const lowerNeedle = text.toLowerCase();
+        return row => {
+          const joined = row.join(' ').toLowerCase();
+          if(lowerNeedle && !joined.includes(lowerNeedle)) return false;
+          if(colIdx != null){
+            const cell = (row[colIdx] || '').toLowerCase();
+            if(!cell.includes(lowerNeedle || '')) return false;
+          }
+          return true;
+        };
+      }
+
+      function searchInWindow(){
+        if(!state.lastWindowText){ log('No hay ventana cargada para buscar.'); return; }
+        const predicate = buildPredicate();
+        if(!predicate){ log('Define al menos un texto de búsqueda o columna.'); return; }
+        const maxRows = Math.max(50, Number(els.maxRowsInput.value) || 200);
+        const delim = state.delimiter === 'auto' ? detectDelimiter(state.lastWindowText.slice(0, 8000)) : state.delimiter;
+        const lines = state.lastWindowText.split(/\r?\n/).filter(Boolean);
+        let header = state.header ? [...state.header] : null;
+        let startIdx = 0;
+        if(!header && lines.length){
+          header = parseLine(lines[0], delim);
+          startIdx = 1;
+        }
+        const rows=[];
+        for(let i=startIdx;i<lines.length && rows.length<maxRows;i++){
+          const r = parseLine(lines[i], delim);
+          if(predicate(r)) rows.push(r);
+        }
+        renderTable(header, rows);
+        state.lastMatches = rows;
+        state.lastMatchesHeader = header;
+        els.rowInfo.textContent = `${rows.length.toLocaleString('es-ES')} filas coincidentes (ventana)`;
+        els.statusPill.textContent = rows.length ? 'Coincidencias en ventana' : 'Sin coincidencias en ventana';
+        log(`Búsqueda en ventana: ${rows.length} filas coincidentes renderizadas.`);
+      }
+
+      async function searchGlobal(){
+        if(!state.file){ log('No hay archivo cargado para búsqueda global.'); return; }
+        const predicate = buildPredicate();
+        if(!predicate){ log('Define al menos un texto de búsqueda o columna para búsqueda global.'); return; }
+        const maxRows = Math.max(50, Number(els.maxRowsInput.value) || 200);
+        const chunkMB = Math.max(1, Number(els.chunkSizeInput.value) || 4);
+        const encoding = els.encodingSelect.value || 'utf-8';
+        state.searchAbort = false;
+        state.searchStartTime = performance.now();
+        els.searchState.textContent = 'running';
+        els.progressBar.style.width = '0%';
+        els.progressText.textContent = '0 %';
+        els.etaText.textContent = 'calculando…';
+        setBusy(true, 'Buscando en todo el archivo…');
+        try{
+          const results = [];
+          const overlap = 64 * 1024;
+          let cursor = 0;
+          let header = null;
+          let delim = state.delimiter;
+          while(cursor < state.file.size && results.length < maxRows){
+            if(state.searchAbort){
+              log('Búsqueda global cancelada por el usuario.');
+              break;
+            }
+            const start = Math.max(0, cursor === 0 ? 0 : cursor - overlap);
+            const end = Math.min(state.file.size, cursor + chunkMB * 1024 * 1024);
+            const text = await readBlobText(state.file.slice(start, end), encoding);
+            let usable = text;
+            if(start > 0){
+              const firstBreak = usable.search(/\r?\n/);
+              usable = firstBreak >= 0 ? usable.slice(firstBreak + 1) : usable;
+            }
+            const lastBreak = usable.lastIndexOf('\n');
+            if(lastBreak > 0) usable = usable.slice(0, lastBreak);
+            if(!usable.trim()){ cursor = end; continue; }
+            if(delim === 'auto') delim = detectDelimiter(usable.slice(0, 8000));
+            const lines = usable.split(/\r?\n/).filter(Boolean);
+            let startIdx = 0;
+            if(!header && lines.length){
+              header = parseLine(lines[0], delim);
+              startIdx = 1;
+            }
+            for(let i=startIdx;i<lines.length && results.length<maxRows;i++){
+              const row = parseLine(lines[i], delim);
+              if(predicate(row)) results.push(row);
+            }
+            cursor = end;
+            const percent = Math.min(100, (cursor / state.file.size) * 100);
+            els.progressBar.style.width = `${percent}%`;
+            els.progressText.textContent = `${percent.toFixed(1)} %`;
+            const elapsed = (performance.now() - state.searchStartTime) / 1000;
+            if(elapsed > 0){
+              const bytesPerSec = cursor / elapsed;
+              const remainingBytes = state.file.size - cursor;
+              const etaSec = remainingBytes / bytesPerSec;
+              els.etaText.textContent = etaSec > 1 ? `~${etaSec.toFixed(1)} s` : '<1 s';
+            }
+            await new Promise(r => setTimeout(r, 0));
+          }
+          renderTable(header || state.header, results);
+          state.lastMatches = results;
+          state.lastMatchesHeader = header || state.header;
+          els.rowInfo.textContent = `${results.length.toLocaleString('es-ES')} filas coincidentes (global)`;
+          els.statusPill.textContent = results.length ? 'Coincidencias globales' : (state.searchAbort ? 'Búsqueda cancelada' : 'Sin coincidencias globales');
+          log(`Búsqueda global completada: ${results.length} filas coincidentes (tope ${maxRows}).`);
+        } catch(err){
+          log(`Error en búsqueda global: ${err.message}`);
+        } finally {
+          setBusy(false, els.statusPill.textContent);
+          els.searchState.textContent = state.searchAbort ? 'cancelled' : 'idle';
+          state.searchAbort = false;
+          els.etaText.textContent = '—';
+        }
+      }
+
+      function cancelSearch(){
+        if(els.searchState.textContent === 'running'){
+          state.searchAbort = true;
+          els.searchState.textContent = 'cancelling';
+          log('Solicitud de cancelación de búsqueda global enviada.');
+        }
+      }
+
+      function exportWindow(){
+        if(!state.lastWindowText){ log('No hay ventana bruta para exportar. Lee primero una ventana.'); return; }
+        const blob = new Blob([state.lastWindowText], { type:'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${(state.file?.name || 'fragmento').replace(/\.[^.]+$/, '')}-ventana.csv`;
+        a.click(); URL.revokeObjectURL(a.href);
+        log('Ventana visible exportada como CSV bruto.');
+      }
+
+      function exportMatches(){
+        const rows = state.lastMatches || [];
+        const header = state.lastMatchesHeader || state.header;
+        if(!rows.length || !header){
+          log('No hay coincidencias en memoria para exportar. Ejecuta una búsqueda primero.');
+          return;
+        }
+        const delim = state.delimiter === 'auto' ? ',' : (state.delimiter === '\t' ? '\t' : state.delimiter);
+        const escapeCell = v => {
+          const s = (v ?? '').toString();
+          if(/["\n\r]/.test(s) || s.includes(delim)) return '"' + s.replace(/"/g,'""') + '"';
+          return s;
+        };
+        const lines = [];
+        lines.push(header.map(escapeCell).join(delim));
+        rows.forEach(r => lines.push(header.map((_, idx) => escapeCell(r[idx])).join(delim)));
+        const csv = lines.join('\n');
+        const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${(state.file?.name || 'fragmento').replace(/\.[^.]+$/, '')}-coincidencias.csv`;
+        a.click(); URL.revokeObjectURL(a.href);
+        log(`Exportadas ${rows.length} filas coincidentes a CSV.`);
+      }
+
+      function createSampleFile(){
+        let content = 'id;nombre;valor;nota\n';
+        for(let i=1;i<=5000;i++) content += `${i};fila_${i};${(Math.random()*1000).toFixed(2)};texto demo ${i}\n`;
+        return new File([content], 'demo-grande.csv', { type: 'text/csv' });
+      }
+
+      // PWA: instalación
+      if ('serviceWorker' in navigator) {
+        const swCode = `
+          const CACHE_NAME = 'csv-chunker-v1';
+          self.addEventListener('install', event => {
+            event.waitUntil(
+              caches.open(CACHE_NAME).then(cache => {
+                cache.addAll(['./']);
+              })
+            );
+            self.skipWaiting();
+          });
+          self.addEventListener('activate', event => {
+            event.waitUntil(
+              caches.keys().then(names =>
+                Promise.all(
+                  names.filter(n => n !== CACHE_NAME).map(n => caches.delete(n))
+                )
+              )
+            );
+            self.clients.claim();
+          });
+          self.addEventListener('fetch', event => {
+            event.respondWith(
+              caches.match(event.request).then(res =>
+                res || fetch(event.request).then(resp => {
+                  const clone = resp.clone();
+                  caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                  return resp;
+                })
+              )
+            );
+          });
+        `;
+        const swBlob = new Blob([swCode], { type: 'text/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swUrl).catch(() => {
+          log('Service worker no registrado (navegador/web sin soporte).');
+        });
+      }
+
+      els.installBtn.addEventListener('click', async () => {
+        if (state.deferredPrompt) {
+          state.deferredPrompt.prompt();
+          const { outcome } = await state.deferredPrompt.userChoice;
+          log(`Instalación: ${outcome}`);
+          state.deferredPrompt = null;
+        } else {
+          log('Aún no está disponible la opción de instalación en este momento.');
+        }
+      });
+
+      window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        state.deferredPrompt = e;
+        log('Evento de instalación disponible. Usa el botón “Instalar app” para instalar.');
+      });
+      window.addEventListener('appinstalled', () => {
+        log('App instalada correctamente.');
+        state.deferredPrompt = null;
+      });
+
+      els.pickBtn.addEventListener('click', () => els.fileInput.click());
+      els.fileInput.addEventListener('change', e => { const f = e.target.files?.[0]; if(f) initFile(f); });
+      els.loadSampleBtn.addEventListener('click', async () => initFile(createSampleFile()));
+      ['dragenter','dragover'].forEach(type => els.dropzone.addEventListener(type, e => { e.preventDefault(); els.dropzone.classList.add('drag'); }));
+      ['dragleave','drop'].forEach(type => els.dropzone.addEventListener(type, e => { e.preventDefault(); els.dropzone.classList.remove('drag'); }));
+      els.dropzone.addEventListener('drop', e => { const f = e.dataTransfer.files?.[0]; if(f) initFile(f); });
+      els.dropzone.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' ') { e.preventDefault(); els.fileInput.click(); } });
+      els.readStartBtn.addEventListener('click', () => readWindow(0, true));
+      els.prevBtn.addEventListener('click', () => {
+        if(!state.file) return;
+        const step = Math.max(1, Number(els.chunkSizeInput.value) || 4) * 1024 * 1024;
+        readWindow(Math.max(0, state.offset - step), false);
+      });
+      els.nextBtn.addEventListener('click', () => {
+        if(!state.file) return;
+        const step = Math.max(1, Number(els.chunkSizeInput.value) || 4) * 1024 * 1024;
+        readWindow(Math.min(Math.max(0, state.file.size || 0), state.offset + step), false);
+      });
+      els.exportWindowBtn.addEventListener('click', exportWindow);
+      els.exportMatchesBtn.addEventListener('click', exportMatches);
+      els.delimiterSelect.addEventListener('change', () => { if(state.file) readWindow(state.offset, true); });
+      els.encodingSelect.addEventListener('change', () => { if(state.file) readWindow(state.offset, true); });
+      els.searchWindowBtn.addEventListener('click', searchInWindow);
+      els.searchGlobalBtn.addEventListener('click', searchGlobal);
+      els.searchCancelBtn.addEventListener('click', cancelSearch);
+      els.searchResetBtn.addEventListener('click', () => {
+        els.searchText.value = ''; els.columnSelect.value = '';
+        state.lastMatches = []; state.lastMatchesHeader = null;
+        els.searchState.textContent = 'idle';
+        els.progressBar.style.width = '0%';
+        els.progressText.textContent = '0 %';
+        els.etaText.textContent = '—';
+        log('Búsqueda reseteada y coincidencias limpiadas.');
+      });
+      updateMeta();
+      log('CSV Chunker Viewer listo. Abre un CSV local para empezar.');
+    })();
+  </script>
+</body>
+</html>
