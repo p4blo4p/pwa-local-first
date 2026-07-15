@@ -181,7 +181,7 @@
 
     @media (min-width: 1024px) {
       .container {
-        grid-template-columns: 350px 1fr;
+        grid-template-columns: 350px minmax(0, 1fr);
       }
     }
 
@@ -408,10 +408,12 @@
       overflow-x: auto;
       max-height: 500px;
       overflow-y: auto;
+      width: 100%;
     }
 
     table {
       width: 100%;
+      min-width: max-content;
       border-collapse: collapse;
       font-size: 0.8125rem;
       text-align: left;
@@ -735,7 +737,8 @@
       const manifest = {
         "name": "CSV Chunker - Big File Viewer",
         "short_name": "CSV Chunker",
-        "start_url": ".",
+        "start_url": window.location.pathname,
+        "scope": window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1) || "/",
         "display": "standalone",
         "background_color": "#090a0f",
         "theme_color": "#0d9488",
@@ -747,7 +750,7 @@
           }
         ]
       };
-      els.manifestLink.href = "data:application/manifest+json;base64," + btoa(JSON.stringify(manifest));
+      els.manifestLink.href = "data:application/manifest+json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(manifest))));
 
       // Theme toggle function
       const setTheme = (themeName) => {
@@ -1063,14 +1066,15 @@
 
         const chunkSizeMB = parseInt(els.chunkSize.value, 10);
         const chunkSizeLimit = chunkSizeMB * 1024 * 1024;
-        const overlap = 64 * 1024;
         const maxRows = parseInt(els.maxRows.value, 10);
         const totalSize = state.file.size;
         const encoding = els.encSelect.value;
+        const delim = state.delimiter || ';';
 
         let cursor = 0;
         const results = [];
         const startTime = performance.now();
+        let partialLine = '';
 
         try {
           while (cursor < totalSize && results.length < maxRows) {
@@ -1079,25 +1083,20 @@
               break;
             }
 
-            const start = Math.max(0, cursor === 0 ? 0 : cursor - overlap);
             const end = Math.min(totalSize, cursor + chunkSizeLimit);
+            const chunkText = await readChunkText(state.file, cursor, end, encoding);
+            const oldCursor = cursor;
+            cursor = end;
 
-            let text = await readChunkText(state.file, start, end, encoding);
+            const text = partialLine + chunkText;
+            const lines = text.split(/\r?\n/);
+            
+            // Extract the last element as a partial line (or empty if exact boundary)
+            partialLine = lines.pop() || '';
 
-            if (start > 0) {
-              const firstNewline = text.indexOf('\n');
-              text = firstNewline !== -1 ? text.substring(firstNewline + 1) : text;
-            }
-
-            const lastNewline = text.lastIndexOf('\n');
-            text = lastNewline !== -1 ? text.substring(0, lastNewline) : text;
-
-            if (text.trim()) {
-              const lines = text.split(/\r?\n/).filter(Boolean);
-              const delim = state.delimiter;
-
+            if (lines.length > 0) {
               let startIdx = 0;
-              if (cursor === 0) {
+              if (oldCursor === 0) {
                 const firstCols = parseCSVLine(lines[0], delim);
                 if (state.header && firstCols.join('\u0001') === state.header.join('\u0001')) {
                   startIdx = 1;
@@ -1105,7 +1104,10 @@
               }
 
               for (let i = startIdx; i < lines.length && results.length < maxRows; i++) {
-                const row = parseCSVLine(lines[i], delim);
+                const line = lines[i];
+                if (!line) continue;
+
+                const row = parseCSVLine(line, delim);
                 let isMatch = false;
 
                 if (colIdx !== null) {
@@ -1120,8 +1122,6 @@
                 }
               }
             }
-
-            cursor = end;
 
             // Stats calculations
             const pct = Math.min(100, (cursor / totalSize) * 100);
@@ -1140,10 +1140,29 @@
             await new Promise(r => setTimeout(r, 0));
           }
 
+          // Process final partialLine if match
+          if (!state.abortSearch && partialLine && results.length < maxRows) {
+            const row = parseCSVLine(partialLine, delim);
+            let isMatch = false;
+
+            if (colIdx !== null) {
+              const cell = (row[colIdx] || '').toLowerCase();
+              isMatch = cell.includes(query);
+            } else {
+              isMatch = row.some(cell => (cell || '').toLowerCase().includes(query));
+            }
+
+            if (isMatch) {
+              results.push(row);
+            }
+          }
+
           state.lastMatches = results;
           renderTable(state.header, results);
           els.searchMetrics.textContent = `Resultados totales encontrados: ${results.length} (Tope renderizado: ${maxRows})`;
-          log(`Escaneo finalizado con éxito en ${((performance.now() - startTime) / 1000).toFixed(2)}s.`, 'success');
+          if (!state.abortSearch) {
+            log(`Escaneo finalizado con éxito en ${((performance.now() - startTime) / 1000).toFixed(2)}s.`, 'success');
+          }
 
         } catch (err) {
           log(`Fallo durante escaneo global: ${err.message}`, 'error');
@@ -1265,35 +1284,40 @@
         if (state.file) loadWindow(state.offset);
       });
 
-      // PWA service worker inline setup
+      // PWA service worker registration (tries standard sw.js first, falls back to inline blob)
       if ('serviceWorker' in navigator) {
-        const sw = `
-          const CACHE = 'csv-chunker-standalone-v1';
-          self.addEventListener('install', e => {
-            e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./'])));
-            self.skipWaiting();
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('SW estándar offline registrado con éxito en scope:', reg.scope))
+          .catch(err => {
+            console.warn('Registro de sw.js estándar fallido, iniciando SW inline de respaldo:', err);
+            const sw = `
+              const CACHE = 'csv-chunker-standalone-v1';
+              self.addEventListener('install', e => {
+                e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./'])));
+                self.skipWaiting();
+              });
+              self.addEventListener('activate', e => {
+                e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
+                self.clients.claim();
+              });
+              self.addEventListener('fetch', e => {
+                if (e.request.method !== 'GET') return;
+                e.respondWith(
+                  caches.match(e.request).then(res => res || fetch(e.request).then(resp => {
+                    if (resp.status === 200) {
+                      const copy = resp.clone();
+                      caches.open(CACHE).then(c => c.put(e.request, copy));
+                    }
+                    return resp;
+                  }))
+                );
+              });
+            `;
+            const blob = new Blob([sw], { type: 'text/javascript' });
+            navigator.serviceWorker.register(URL.createObjectURL(blob))
+              .then(reg => console.log('SW inline de respaldo registrado con éxito.'))
+              .catch(err2 => console.warn('SW inline err:', err2));
           });
-          self.addEventListener('activate', e => {
-            e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
-            self.clients.claim();
-          });
-          self.addEventListener('fetch', e => {
-            if (e.request.method !== 'GET') return;
-            e.respondWith(
-              caches.match(e.request).then(res => res || fetch(e.request).then(resp => {
-                if (resp.status === 200) {
-                  const copy = resp.clone();
-                  caches.open(CACHE).then(c => c.put(e.request, copy));
-                }
-                return resp;
-              }))
-            );
-          });
-        `;
-        const blob = new Blob([sw], { type: 'text/javascript' });
-        navigator.serviceWorker.register(URL.createObjectURL(blob))
-          .then(reg => console.log('SW registrado offline.'))
-          .catch(err => console.warn('SW err:', err));
       }
 
       window.addEventListener('beforeinstallprompt', e => {
