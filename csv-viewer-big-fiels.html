@@ -1,772 +1,1317 @@
-<!-- CSV Chunker Viewer v7 PWA - última versión generada en chat -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSV Chunker Viewer</title>
+  <title>CSV Chunker - Visor de CSVs Gigantes</title>
 
-  <!-- Meta tags para app móvil -->
-  <meta name="theme-color" content="#01696f">
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#0d9488">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CSV Chunker">
 
-  <!-- Manifest embebido -->
+  <!-- Manifest Embebido en Base64 para máxima portabilidad -->
   <link id="manifestLink" rel="manifest" href="">
 
   <style>
-    :root, [data-theme="light"] {
-      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
-      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
-      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
-      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
-      --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
-      --space-12: 3rem; --space-16: 4rem;
-      --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9;
-      --color-surface-offset: #edeae5; --color-border: #d4d1ca; --color-divider: #dcd9d5;
-      --color-text: #28251d; --color-text-muted: #67655f; --color-text-faint: #8e8b84;
-      --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-highlight: #cedcd8;
-      --color-error: #a12c7b; --color-warning: #964219; --color-success: #437a22;
-      --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem; --radius-full: 9999px;
-      --shadow-sm: 0 1px 2px rgba(40,37,29,.06); --shadow-md: 0 6px 18px rgba(40,37,29,.08);
-      --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
-      --font-body: Inter, ui-sans-serif, system-ui, sans-serif;
-      --font-display: Inter, ui-sans-serif, system-ui, sans-serif;
+    :root {
+      --color-bg: #090a0f;
+      --color-surface: #11131e;
+      --color-surface-hover: #171b2c;
+      --color-border: #1f2438;
+      --color-text: #f1f5f9;
+      --color-text-muted: #94a3b8;
+      --color-primary: #0d9488;
+      --color-primary-hover: #0f766e;
+      --color-success: #10b981;
+      --color-error: #f43f5e;
+      --color-warning: #f59e0b;
+      --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
-    [data-theme="dark"] {
-      --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d;
-      --color-surface-offset: #22211f; --color-border: #393836; --color-divider: #262523;
-      --color-text: #cdccca; --color-text-muted: #a9a7a3; --color-text-faint: #7b7975;
-      --color-primary: #4f98a3; --color-primary-hover: #227f8b; --color-primary-highlight: #313b3b;
-      --color-error: #d163a7; --color-warning: #bb653b; --color-success: #6daa45;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,.2); --shadow-md: 0 8px 24px rgba(0,0,0,.32);
+
+    [data-theme="light"] {
+      --color-bg: #f8fafc;
+      --color-surface: #ffffff;
+      --color-surface-hover: #f1f5f9;
+      --color-border: #e2e8f0;
+      --color-text: #0f172a;
+      --color-text-muted: #64748b;
+      --color-primary: #0d9488;
+      --color-primary-hover: #0f766e;
     }
-    *,*::before,*::after{box-sizing:border-box}
-    html{-webkit-text-size-adjust:none;text-size-adjust:none;scroll-behavior:smooth}
-    body{margin:0;min-height:100dvh;background:var(--color-bg);color:var(--color-text);font:400 var(--text-base)/1.6 var(--font-body)}
-    button,input,select{font:inherit;color:inherit}
-    button{cursor:pointer}
-    a{color:inherit;text-decoration:none}
-    .app{max-width:1280px;margin:0 auto;padding:var(--space-4)}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-3) 0 var(--space-6)}
-    .brand{display:flex;align-items:center;gap:var(--space-3)}
-    .logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--color-primary),color-mix(in srgb, var(--color-primary) 68%, white));display:grid;place-items:center;color:white;box-shadow:var(--shadow-md)}
-    .logo svg{width:24px;height:24px}
-    h1,h2,h3{margin:0;line-height:1.15;text-wrap:balance}
-    h1{font-family:var(--font-display);font-size:var(--text-xl)}
-    h2{font-size:var(--text-lg)}
-    p{margin:0;color:var(--color-text-muted);max-width:74ch}
-    .theme-btn,.btn{border:1px solid var(--color-border);background:var(--color-surface);border-radius:var(--radius-md);transition:var(--transition);min-height:44px}
-    .theme-btn{width:44px;display:grid;place-items:center}
-    .theme-btn:hover,.btn:hover{background:var(--color-surface-2)}
-    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--space-4)}
-    .panel{background:var(--color-surface);border:1px solid color-mix(in srgb, var(--color-text) 10%, transparent);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)}
-    .panel-inner{padding:var(--space-5)}
-    .hero{display:grid;gap:var(--space-4)}
-    .dropzone{border:1.5px dashed color-mix(in srgb, var(--color-primary) 40%, var(--color-border));background:linear-gradient(180deg,color-mix(in srgb, var(--color-primary-highlight) 40%, var(--color-surface)),var(--color-surface));border-radius:var(--radius-xl);padding:var(--space-6);display:grid;gap:var(--space-4)}
-    .dropzone.drag{border-color:var(--color-primary);background:color-mix(in srgb, var(--color-primary-highlight) 70%, var(--color-surface))}
-    .btn{padding:0 var(--space-4)}
-    .btn-primary{background:var(--color-primary);border-color:var(--color-primary);color:white}
-    .btn-primary:hover{background:var(--color-primary-hover)}
-    .btn-row{display:flex;flex-wrap:wrap;gap:var(--space-3)}
-    .controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-4)}
-    .field{display:grid;gap:var(--space-2)}
-    .field label{font-size:var(--text-sm);color:var(--color-text)}
-    .field input,.field select{width:100%;min-height:44px;border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface-2);padding:0 var(--space-3)}
-    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-3)}
-    .stat{padding:var(--space-4);border-radius:var(--radius-lg);background:var(--color-surface-2);border:1px solid color-mix(in srgb, var(--color-text) 8%, transparent)}
-    .stat strong{display:block;font-size:var(--text-lg);color:var(--color-text)}
-    .mini{font-size:var(--text-sm);color:var(--color-text-muted)}
-    .log{white-space:pre-wrap;background:var(--color-surface-2);border:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);border-radius:var(--radius-lg);padding:var(--space-4);max-height:220px;overflow:auto;font-size:var(--text-sm)}
-    .table-wrap{overflow:auto;border-top:1px solid var(--color-divider);border-radius:var(--radius-lg)}
-    table{width:100%;border-collapse:collapse;font-size:var(--text-sm);min-width:600px}
-    th,td{padding:0.75rem;border-bottom:1px solid var(--color-divider);text-align:left;vertical-align:top;white-space:nowrap}
-    th{position:sticky;top:0;background:var(--color-surface);z-index:1;text-overflow:ellipsis;overflow:hidden}
-    tbody tr:hover{background:color-mix(in srgb, var(--color-primary-highlight) 30%, transparent)}
-    .pill{display:inline-flex;align-items:center;gap:.5rem;min-height:32px;padding:0 .75rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-text);font-size:var(--text-sm)}
-    .footer-actions{display:flex;flex-wrap:wrap;gap:var(--space-3);padding-top:var(--space-4)}
-    .hint-list{display:grid;gap:var(--space-3);padding-left:1.1rem;margin:0}
-    .muted{color:var(--color-text-muted)}
-    .ok{color:var(--color-success)} .warn{color:var(--color-warning)} .err{color:var(--color-error)}
-    .hidden{display:none!important}
-    .statusbar{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
-    .progress{height:12px;background:var(--color-surface-offset);border-radius:999px;overflow:hidden;border:1px solid color-mix(in srgb, var(--color-text) 8%, transparent)}
-    .progress>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--color-primary),color-mix(in srgb, var(--color-primary) 55%, white));transition:width .15s linear}
-    .searchbar{display:grid;grid-template-columns:1fr;gap:var(--space-3)}
-    .search-row{display:flex;flex-wrap:wrap;gap:var(--space-3);margin-top:var(--space-2)}
-    .sticky-tools{position:sticky;top:0;z-index:4;background:linear-gradient(180deg,var(--color-bg) 78%,transparent);padding-bottom:var(--space-4)}
-    .kbd{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.85em;padding:.1rem .35rem;border:1px solid var(--color-border);border-bottom-width:2px;border-radius:6px;background:var(--color-surface-2)}
-    @media (max-width: 920px){
-      .grid{grid-template-columns:1fr}
-      .stats{grid-template-columns:1fr 1fr}
-      .controls,.searchbar{grid-template-columns:1fr}
-      .topbar{align-items:flex-start;flex-direction:column}
-      .footer-actions{justify-content:flex-start}
-      .table-wrap{border-radius:0;border-top:none}
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+    body {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    header {
+      border-bottom: 1px solid var(--color-border);
+      background-color: rgba(17, 19, 30, 0.85);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 0.75rem 1rem;
+    }
+
+    [data-theme="light"] header {
+      background-color: rgba(255, 255, 255, 0.85);
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-container {
+      background-color: var(--color-primary);
+      color: white;
+      border-radius: 0.75rem;
+      padding: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);
+    }
+
+    .logo-container svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .brand-text h1 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      background: none;
+      color: var(--color-text);
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--color-primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--color-surface);
+      border-color: var(--color-border);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--color-surface-hover);
+    }
+
+    .btn-icon {
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--color-border);
+      background-color: var(--color-surface);
+      color: var(--color-text-muted);
+    }
+
+    .btn-icon:hover {
+      color: var(--color-text);
+      background-color: var(--color-surface-hover);
+    }
+
+    .container {
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      flex-grow: 1;
+    }
+
+    @media (min-width: 1024px) {
+      .container {
+        grid-template-columns: 350px 1fr;
+      }
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-text-muted);
+      border-bottom: 1px solid var(--color-border);
+      padding-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Drag and Drop Zone */
+    .dropzone {
+      border: 2px dashed var(--color-border);
+      border-radius: 0.75rem;
+      padding: 2rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background-color: rgba(255, 255, 255, 0.01);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--color-primary);
+      background-color: rgba(13, 148, 136, 0.05);
+    }
+
+    .dropzone-icon {
+      color: var(--color-primary);
+    }
+
+    .dropzone-text h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .dropzone-text p {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Form Fields */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .field label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+    }
+
+    .select, .input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--color-border);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .select:focus, .input:focus {
+      border-color: var(--color-primary);
+    }
+
+    /* Console logs */
+    .console-logs {
+      background-color: #05060a;
+      border: 1px solid var(--color-border);
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      max-height: 180px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .log-item {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .log-timestamp {
+      color: #64748b;
+      flex-shrink: 0;
+    }
+
+    .log-info { color: #cbd5e1; }
+    .log-success { color: #34d399; }
+    .log-warning { color: #fbbf24; }
+    .log-error { color: #f87171; }
+
+    /* Main Dashboard Panel */
+    .dashboard {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-text);
+      word-break: break-all;
+    }
+
+    .stat-sub {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .progress-bar-bg {
+      height: 0.5rem;
+      background-color: var(--color-bg);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background-color: var(--color-primary);
+      width: 0%;
+      transition: width 0.15s ease;
+    }
+
+    /* Interactive Table controls & table */
+    .table-container {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 1rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .table-controls {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--color-border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--color-border);
+      color: var(--color-text);
+      white-space: nowrap;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    tr:hover td {
+      background-color: var(--color-surface-hover);
+    }
+
+    /* Hidden Utilities */
+    .hidden {
+      display: none !important;
+    }
+
+    .kbd {
+      font-family: var(--font-mono);
+      background-color: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: 0.25rem;
+      padding: 0.125rem 0.25rem;
+      font-size: 0.75rem;
+    }
   </style>
 </head>
 <body>
-  <a class="sr-only" href="#main">Saltar al contenido</a>
-  <div class="app">
-    <header class="topbar">
+
+  <header>
+    <div class="header-container">
       <div class="brand">
-        <div class="logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-label="Logo CSV">
-            <path d="M4 6.5h9l2 2H20"></path>
-            <path d="M4 6.5v11A2.5 2.5 0 0 0 6.5 20H17.5A2.5 2.5 0 0 0 20 17.5V8.5"></path>
-            <path d="M8 11.5h8M8 15.5h5"></path>
+        <div class="logo-container">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1='16' y1='13' x2='8' y2='13'></line>
+            <line x1='16' y1='17' x2='8' y2='17'></line>
+            <polyline points='10 9 9 9 8 9'></polyline>
           </svg>
         </div>
-        <div>
-          <h1>CSV Chunker Viewer</h1>
-          <p>Explora CSV gigantes con scroll horizontal en tabla, estadísticas y PWA (HTTPS + service worker).</p>
+        <div class="brand-text">
+          <h1>CSV Chunker</h1>
+          <p>Visor local-first de archivos masivos &gt;6GB</p>
         </div>
       </div>
-      <button class="btn" id="installBtn">Instalar app</button>
-      <button class="theme-btn" data-theme-toggle aria-label="Cambiar tema" title="Cambiar tema"></button>
-    </header>
 
-    <main id="main" class="grid">
-      <section class="hero panel">
-        <div class="panel-inner">
-          <div class="dropzone" id="dropzone" tabindex="0" aria-label="Zona para soltar archivo CSV">
-            <div>
-              <span class="pill">Offline · Local first · PWA v7</span>
-              <h2 style="margin-top:1rem">Carga un CSV o TXT delimitado enorme</h2>
-              <p>Lee por ventanas de bytes, detecta cabecera y busca coincidencias en todo el archivo sin reventar la RAM del móvil ni romper el layout con 67 columnas.</p>
+      <div class="header-actions">
+        <button id="installBtn" class="btn btn-primary hidden">Instalar App</button>
+        <button id="themeToggleBtn" class="btn-icon" aria-label="Cambiar Tema">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.25rem; height: 1.25rem;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Sidebar Controls -->
+    <aside class="sidebar">
+      
+      <!-- Upload File Card -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Archivo de entrada
+        </div>
+
+        <div id="dropzone" class="dropzone">
+          <svg class="dropzone-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <div class="dropzone-text">
+            <h3>Arrastra tu archivo CSV</h3>
+            <p>Soporta archivos de más de 6 gigabytes</p>
+          </div>
+          <input type="file" id="fileInput" class="hidden" accept=".csv,.txt" />
+          <button id="browseBtn" class="btn btn-primary" style="margin-top: 0.5rem;">Explorar</button>
+        </div>
+
+        <button id="demoBtn" class="btn btn-secondary">Generar datos demo gigantes</button>
+      </div>
+
+      <!-- Settings Card -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Configuración
+        </div>
+
+        <div class="field">
+          <label for="delimSelect">Delimitador</label>
+          <select id="delimSelect" class="select">
+            <option value="auto">Auto-detectar</option>
+            <option value=",">Coma (,)</option>
+            <option value=";">Punto y coma (;)</option>
+            <option value="	">Tabulación (Tab)</option>
+            <option value="|">Barra vertical (|)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="encSelect">Codificación</label>
+          <select id="encSelect" class="select">
+            <option value="utf-8">UTF-8</option>
+            <option value="windows-1252">Windows-1252</option>
+            <option value="iso-8859-1">ISO-8859-1</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="chunkSize">Tamaño de Bloque (Lectura): <span id="chunkVal" class="kbd">4 MB</span></label>
+          <input type="range" id="chunkSize" min="1" max="64" step="1" value="4" style="accent-color: var(--color-primary);" />
+        </div>
+
+        <div class="field">
+          <label for="maxRows">Límite de Filas en Pantalla: <span id="rowsVal" class="kbd">200</span></label>
+          <input type="range" id="maxRows" min="50" max="2000" step="50" value="200" style="accent-color: var(--color-primary);" />
+        </div>
+      </div>
+
+      <!-- Diagnostic logs -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Historial de Diagnóstico
+        </div>
+        <div id="logs" class="console-logs"></div>
+      </div>
+
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="dashboard">
+      
+      <!-- Stats bento grid -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Archivo Cargado</div>
+          <div id="statFileName" class="stat-value">—</div>
+          <div id="statFileSize" class="stat-sub">Sin archivo</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Tamaño en RAM</div>
+          <div id="statRamUsage" class="stat-value">0 B</div>
+          <div id="statRamSub" class="stat-sub">Solo se carga el bloque actual</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Offset actual</div>
+          <div id="statOffset" class="stat-value">0 B</div>
+          <div id="statOffsetSub" class="stat-sub">Posición del buffer en bytes</div>
+        </div>
+      </section>
+
+      <!-- Progress bar -->
+      <section id="progressSection" class="progress-container hidden">
+        <div class="progress-header">
+          <span id="progressStatus">Buscando en el archivo...</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div id="progressBar" class="progress-bar-fill"></div>
+        </div>
+        <div class="progress-header" style="margin-top: 0.25rem; font-size: 0.7rem; color: var(--color-text-muted);">
+          <span id="progressSpeed">Velocidad: — MB/s</span>
+          <span id="progressEta">Tiempo restante: —</span>
+        </div>
+      </section>
+
+      <!-- Advanced Search / Filters -->
+      <section class="card">
+        <div class="card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          Motor de Búsqueda Inteligente
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; align-items: flex-end; width: 100%;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div class="field">
+              <label for="searchQuery">Texto de búsqueda</label>
+              <input type="text" id="searchQuery" class="input" placeholder="Ej: error, TX-409, id_usuario..." />
             </div>
-            <div class="btn-row">
-              <input id="fileInput" type="file" accept=".csv,text/csv,.txt" class="hidden" />
-              <button class="btn btn-primary" id="pickBtn">Elegir archivo</button>
-              <button class="btn" id="loadSampleBtn">Demo interna</button>
+            <div class="field">
+              <label for="columnFilter">Filtrar por columna</label>
+              <select id="columnFilter" class="select">
+                <option value="">— Todas las columnas —</option>
+              </select>
             </div>
-            <div class="mini">Para CSV de varios GB: carga inicial ligera, ventanas ajustables, búsqueda global con límite de filas y exportación de coincidencias.</div>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: space-between; align-items: center;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button id="searchLocalBtn" class="btn btn-secondary">Filtrar Ventana</button>
+              <button id="searchGlobalBtn" class="btn btn-primary">Buscar en todo el archivo (&gt;6GB)</button>
+              <button id="cancelSearchBtn" class="btn btn-secondary hidden" style="background-color: var(--color-error); color: white; border-color: var(--color-error);">Cancelar</button>
+              <button id="resetSearchBtn" class="btn btn-secondary">Restablecer</button>
+            </div>
+            <div style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--color-text-muted);" id="searchMetrics">
+              Coincidencias encontradas: 0
+            </div>
           </div>
         </div>
       </section>
 
-      <aside class="panel">
-        <div class="panel-inner" style="display:grid;gap:1rem">
-          <h2>Modo de uso</h2>
-          <ol class="hint-list muted">
-            <li>Abre el archivo: se detectan tamaño, cabecera y delimitador con una lectura pequeña.</li>
-            <li>Lee ventanas con tamaño configurable y máximo de filas renderizadas.</li>
-            <li>Busca texto simple o filtra por una columna, en la ventana o en todo el archivo, y exporta las coincidencias.</li>
-          </ol>
-          <div class="log" id="log">Esperando archivo…</div>
-        </div>
-      </aside>
-
-      <section class="panel" style="grid-column:1 / -1">
-        <div class="panel-inner sticky-tools">
-          <div class="stats">
-            <div class="stat"><div class="mini">Archivo</div><strong id="fileName">—</strong><div class="mini" id="fileMeta">Sin cargar</div></div>
-            <div class="stat"><div class="mini">Ventana actual</div><strong id="windowInfo">0 B</strong><div class="mini" id="rowInfo">0 filas renderizadas</div></div>
-            <div class="stat"><div class="mini">Cabecera</div><strong id="headerInfo">—</strong><div class="mini" id="delimiterInfo">Delimitador automático</div></div>
+      <!-- Table visualization Card -->
+      <section class="table-container">
+        <div class="table-controls">
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button id="prevChunkBtn" class="btn btn-secondary" disabled>Anterior Bloque</button>
+            <button id="nextChunkBtn" class="btn btn-secondary" disabled>Siguiente Bloque</button>
           </div>
-
-          <div class="controls" style="margin-top:1rem">
-            <div class="field"><label for="delimiterSelect">Delimitador</label><select id="delimiterSelect"><option value="auto">Auto</option><option value=",">Coma ,</option><option value=";">Punto y coma ;</option><option value="tab">Tab</option><option value="|">Barra vertical |</option></select></div>
-            <div class="field"><label for="encodingSelect">Decodificación</label><select id="encodingSelect"><option value="utf-8">UTF-8</option><option value="windows-1252">Windows-1252</option><option value="iso-8859-1">ISO-8859-1</option></select></div>
-            <div class="field"><label for="chunkSizeInput">Tamaño ventana lectura (MB)</label><input id="chunkSizeInput" type="number" min="1" max="64" step="1" value="4" /></div>
-            <div class="field"><label for="maxRowsInput">Máx. filas a renderizar / coincidencias</label><input id="maxRowsInput" type="number" min="50" max="2000" step="50" value="200" /></div>
-          </div>
-
-          <div class="footer-actions">
-            <button class="btn" id="readStartBtn">Leer inicio</button>
-            <button class="btn" id="prevBtn">Ventana anterior</button>
-            <button class="btn" id="nextBtn">Ventana siguiente</button>
-            <button class="btn" id="exportWindowBtn">Exportar ventana visible</button>
-            <button class="btn" id="exportMatchesBtn">Exportar coincidencias</button>
-          </div>
-
-          <div style="margin-top:1rem;display:grid;gap:.65rem">
-            <div class="statusbar">
-              <span class="pill" id="statusPill">Sin archivo</span>
-              <span class="mini">Offset actual: <span class="kbd" id="offsetInfo">0</span></span>
-              <span class="mini">Búsqueda global: <span class="kbd" id="searchState">idle</span></span>
-              <span class="mini">Progreso: <span class="kbd" id="progressText">0 %</span></span>
-              <span class="mini">ETA: <span class="kbd" id="etaText">—</span></span>
-            </div>
-            <div class="progress" aria-label="Progreso aproximado"><span id="progressBar"></span></div>
-          </div>
-
-          <div class="stats" style="margin-top:1rem;grid-template-columns:repeat(3,minmax(0,1fr))">
-            <div class="stat"><div class="mini">Columnas</div><strong id="statsCols">—</strong><div class="mini"></div></div>
-            <div class="stat"><div class="mini">Líneas</div><strong id="statsLines">—</strong><div class="mini">Total</div></div>
-            <div class="stat"><div class="mini">Datos</div><strong id="statsRows">—</strong><div class="mini">Sin cabecera</div></div>
-          </div>
-
-          <div class="searchbar" style="margin-top:1rem">
-            <div class="field">
-              <label for="searchText">Texto de búsqueda (global o ventana)</label>
-              <input id="searchText" type="text" placeholder="Ejemplo: error, id_123, usuario@correo…" />
-            </div>
-            <div class="search-row">
-              <div class="field" style="flex:1 1 180px">
-                <label for="columnSelect">Columna específica (opcional)</label>
-                <select id="columnSelect"><option value="">— ninguna —</option></select>
-              </div>
-              <div class="field" style="flex:1 1 220px">
-                <label>&nbsp;</label>
-                <div style="display:flex;flex-wrap:wrap;gap:.5rem">
-                  <button class="btn" id="searchWindowBtn">Buscar en ventana</button>
-                  <button class="btn" id="searchGlobalBtn">Buscar en todo el archivo</button>
-                  <button class="btn" id="searchCancelBtn">Cancelar búsqueda</button>
-                  <button class="btn" id="searchResetBtn">Reset búsqueda</button>
-                </div>
-              </div>
-            </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button id="exportBtn" class="btn btn-secondary" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Exportar Coincidencias / Vista
+            </button>
           </div>
         </div>
 
-        <div class="table-wrap">
-          <table id="resultTable" aria-label="Vista previa CSV">
-            <thead><tr id="theadRow"><th>Sin datos</th></tr></thead>
-            <tbody id="tbody"></tbody>
+        <div class="table-scroll">
+          <table id="csvTable">
+            <thead>
+              <tr id="tableHeader">
+                <th>Sin datos cargados</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr>
+                <td>Arrastra un archivo CSV o genera datos demo para comenzar a explorar.</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </section>
+
     </main>
   </div>
 
   <script>
     (() => {
+      // Elements selector helper
       const $ = s => document.querySelector(s);
+      
       const els = {
-        themeBtn: $('[data-theme-toggle]'), dropzone: $('#dropzone'), fileInput: $('#fileInput'), pickBtn: $('#pickBtn'),
-        loadSampleBtn: $('#loadSampleBtn'), fileName: $('#fileName'), fileMeta: $('#fileMeta'), windowInfo: $('#windowInfo'),
-        rowInfo: $('#rowInfo'), headerInfo: $('#headerInfo'), delimiterInfo: $('#delimiterInfo'), delimiterSelect: $('#delimiterSelect'),
-        encodingSelect: $('#encodingSelect'), chunkSizeInput: $('#chunkSizeInput'), maxRowsInput: $('#maxRowsInput'),
-        readStartBtn: $('#readStartBtn'), prevBtn: $('#prevBtn'), nextBtn: $('#nextBtn'), exportWindowBtn: $('#exportWindowBtn'),
-        exportMatchesBtn: $('#exportMatchesBtn'), statusPill: $('#statusPill'), offsetInfo: $('#offsetInfo'), progressBar: $('#progressBar'),
-        searchState: $('#searchState'), progressText: $('#progressText'), etaText: $('#etaText'),
-        theadRow: $('#theadRow'), tbody: $('#tbody'), log: $('#log'), searchText: $('#searchText'),
-        columnSelect: $('#columnSelect'), searchWindowBtn: $('#searchWindowBtn'), searchGlobalBtn: $('#searchGlobalBtn'),
-        searchCancelBtn: $('#searchCancelBtn'), searchResetBtn: $('#searchResetBtn'), installBtn: $('#installBtn'),
-        statsCols: $('#statsCols'), statsLines: $('#statsLines'), statsRows: $('#statsRows'),
+        themeToggleBtn: $('#themeToggleBtn'),
+        installBtn: $('#installBtn'),
+        dropzone: $('#dropzone'),
+        fileInput: $('#fileInput'),
+        browseBtn: $('#browseBtn'),
+        demoBtn: $('#demoBtn'),
+        delimSelect: $('#delimSelect'),
+        encSelect: $('#encSelect'),
+        chunkSize: $('#chunkSize'),
+        chunkVal: $('#chunkVal'),
+        maxRows: $('#maxRows'),
+        rowsVal: $('#rowsVal'),
+        logs: $('#logs'),
+        statFileName: $('#statFileName'),
+        statFileSize: $('#statFileSize'),
+        statRamUsage: $('#statRamUsage'),
+        statOffset: $('#statOffset'),
+        statOffsetSub: $('#statOffsetSub'),
+        progressSection: $('#progressSection'),
+        progressStatus: $('#progressStatus'),
+        progressPercent: $('#progressPercent'),
+        progressBar: $('#progressBar'),
+        progressSpeed: $('#progressSpeed'),
+        progressEta: $('#progressEta'),
+        searchQuery: $('#searchQuery'),
+        columnFilter: $('#columnFilter'),
+        searchLocalBtn: $('#searchLocalBtn'),
+        searchGlobalBtn: $('#searchGlobalBtn'),
+        cancelSearchBtn: $('#cancelSearchBtn'),
+        resetSearchBtn: $('#resetSearchBtn'),
+        searchMetrics: $('#searchMetrics'),
+        prevChunkBtn: $('#prevChunkBtn'),
+        nextChunkBtn: $('#nextChunkBtn'),
+        exportBtn: $('#exportBtn'),
+        tableHeader: $('#tableHeader'),
+        tableBody: $('#tableBody'),
         manifestLink: $('#manifestLink')
       };
 
+      // App state
       const state = {
         file: null,
         offset: 0,
         header: null,
         delimiter: 'auto',
         lastWindowText: '',
-        lastWindowStart: 0,
-        lastWindowEnd: 0,
-        busy: false,
-        searchAbort: false,
         lastMatches: [],
         lastMatchesHeader: null,
-        searchStartTime: 0,
-        totalLines: 0,
+        isSearching: false,
+        abortSearch: false,
+        theme: 'dark',
         deferredPrompt: null
       };
 
-      // Manifest en base64
+      // Manifest generation for direct standalone download support
       const manifest = {
-        "name": "CSV Chunker Viewer",
+        "name": "CSV Chunker - Big File Viewer",
         "short_name": "CSV Chunker",
-        "start_url": "./",
-        "scope": "./",
+        "start_url": ".",
         "display": "standalone",
-        "background_color": "#f7f6f2",
-        "theme_color": "#01696f",
+        "background_color": "#090a0f",
+        "theme_color": "#0d9488",
         "icons": [
           {
-            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2301696f'%3E%3Cpath d='M4 6.5h9l2 2H20M4 6.5v11a2.5 2.5 0 0 0 2.5 2.5h11a2.5 2.5 0 0 0 2.5-2.5V8.5M8 11.5h8M8 15.5h5'/%3E%3C/svg%3E",
+            "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 24 24' fill='none' stroke='%230d9488' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'></path><polyline points='14 2 14 8 20 8'></polyline><line x1='16' y1='13' x2='8' y2='13'></line><line x1='16' y1='17' x2='8' y2='17'></line><polyline points='10 9 9 9 8 9'></polyline></svg>",
             "sizes": "192x192",
-            "type": "image/svg+xml"
-          },
-          {
-            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2301696f'%3E%3Cpath d='M4 6.5h9l2 2H20M4 6.5v11a2.5 2.5 0 0 0 2.5 2.5h11a2.5 2.5 0 0 0 2.5-2.5V8.5M8 11.5h8M8 15.5h5'/%3E%3C/svg%3E",
-            "sizes": "512x512",
             "type": "image/svg+xml"
           }
         ]
       };
-      const manifestJson = JSON.stringify(manifest);
-      const manifestBase64 = btoa(manifestJson);
-      els.manifestLink.href = "data:application/manifest+json;base64," + manifestBase64;
+      els.manifestLink.href = "data:application/manifest+json;base64," + btoa(JSON.stringify(manifest));
 
-      function setTheme(next){
-        document.documentElement.setAttribute('data-theme', next);
-        els.themeBtn.innerHTML = next === 'dark'
-          ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
-          : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
-      }
-      setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      els.themeBtn.addEventListener('click', () => setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+      // Theme toggle function
+      const setTheme = (themeName) => {
+        state.theme = themeName;
+        document.documentElement.setAttribute('data-theme', themeName);
+        els.themeToggleBtn.innerHTML = themeName === 'dark' 
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.25rem; height: 1.25rem;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 1.25rem; height: 1.25rem;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+      };
+      setTheme('dark');
 
-      function log(msg){
-        const stamp = new Date().toLocaleTimeString();
-        els.log.textContent = `[${stamp}] ${msg}\n` + els.log.textContent;
-      }
-      function fmtBytes(bytes){
-        if (!Number.isFinite(bytes)) return '—';
-        const units = ['B','KB','MB','GB','TB']; let i = 0, n = bytes;
-        while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
-        return `${n.toFixed(n >= 100 || i === 0 ? 0 : 1)} ${units[i]}`;
-      }
-      function updateMeta(){
-        if(!state.file){
-          els.fileName.textContent='—'; els.fileMeta.textContent='Sin cargar'; els.windowInfo.textContent='0 B';
-          els.rowInfo.textContent='0 filas renderizadas'; els.headerInfo.textContent='—'; els.offsetInfo.textContent='0';
-          els.progressBar.style.width='0%'; els.statusPill.textContent='Sin archivo'; els.searchState.textContent='idle';
-          els.progressText.textContent='0 %'; els.etaText.textContent='—';
-          els.statsCols.textContent='—';
-          els.statsLines.textContent='—';
-          els.statsRows.textContent='—';
-          return;
-        }
-        els.fileName.textContent = state.file.name || 'archivo virtual';
-        els.fileMeta.textContent = `${fmtBytes(state.file.size)} · ${state.file.type || 'texto plano'}`;
-        els.offsetInfo.textContent = state.offset.toLocaleString('es-ES');
-        const percent = state.file.size ? Math.min(100, (state.lastWindowEnd / state.file.size) * 100) : 0;
-        els.progressBar.style.width = `${percent}%`;
-        els.progressText.textContent = `${percent.toFixed(1)} %`;
-        els.headerInfo.textContent = state.header ? `${state.header.length} columnas` : 'No detectada';
-        els.delimiterInfo.textContent = `Delimitador: ${humanDelimiter(state.delimiter)}`;
-      }
-      function humanDelimiter(d){ return d==='tab' ? 'tab' : d==='auto' ? 'auto' : d || 'auto'; }
-      function setBusy(v, text=''){ state.busy=v; els.statusPill.textContent=text || (v ? 'Procesando…' : 'Listo'); }
-      function parseLine(line, delimiter){
-        const out=[]; let cur=''; let q=false;
-        for(let i=0;i<line.length;i++){
-          const ch=line[i];
-          if(ch=='"'){
-            if(q && line[i+1]=='"'){ cur+='"'; i++; }
-            else q=!q;
-          } else if(ch===delimiter && !q){ out.push(cur); cur=''; }
-          else cur+=ch;
+      els.themeToggleBtn.addEventListener('click', () => {
+        setTheme(state.theme === 'dark' ? 'light' : 'dark');
+      });
+
+      // Simple diagnostic logger
+      const log = (msg, type = 'info') => {
+        const time = new Date().toLocaleTimeString();
+        const div = document.createElement('div');
+        div.className = 'log-item';
+        div.innerHTML = `<span class="log-timestamp">[${time}]</span><span class="log-${type}">${msg}</span>`;
+        els.logs.appendChild(div);
+        els.logs.scrollTop = els.logs.scrollHeight;
+      };
+
+      const formatBytes = (bytes) => {
+        if (!bytes) return '0 B';
+        const k = 1024;
+        const dm = 2;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+      };
+
+      // Inline CSV parser with quotes management
+      const parseCSVLine = (line, delimiter) => {
+        const out = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if (ch === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+              cur += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (ch === delimiter && !inQuotes) {
+            out.push(cur);
+            cur = '';
+          } else {
+            cur += ch;
+          }
         }
         out.push(cur);
         return out;
-      }
-      function detectDelimiter(sample){
-        const candidates = [',',';','tab','|'];
-        const lines = sample.split(/\r?\n/).filter(Boolean).slice(0, 12);
-        if(!lines.length) return ',';
-        let best = { d:',', score:-1 };
-        for(const d of candidates){
-          const realD = d === 'tab' ? '\t' : d;
-          const counts = lines.map(l => parseLine(l, realD).length);
-          const avg = counts.reduce((a,b)=>a+b,0)/counts.length;
-          const variance = counts.reduce((a,b)=>a+Math.abs(b-avg),0);
-          const score = avg - variance * 0.35;
-          if(score > best.score && avg > 1) best = { d: realD, score };
+      };
+
+      // Smart Delimiter Heuristics
+      const detectDelimiter = (sample) => {
+        const candidates = [',', ';', '\t', '|'];
+        const lines = sample.split(/\r?\n/).filter(Boolean).slice(0, 15);
+        if (!lines.length) return ',';
+
+        let best = { d: ',', score: -1 };
+        for (const d of candidates) {
+          const counts = lines.map(l => parseCSVLine(l, d).length);
+          const avg = counts.reduce((a, b) => a + b, 0) / counts.length;
+          const variance = counts.reduce((a, b) => a + Math.abs(b - avg), 0);
+          const score = avg - variance * 0.4;
+          if (score > best.score && avg > 1) {
+            best = { d, score };
+          }
         }
         return best.d;
-      }
-      async function readBlobText(blob, encoding){
-        const buf = await blob.arrayBuffer();
-        return new TextDecoder(encoding, { fatal:false }).decode(buf);
-      }
+      };
 
-      async function initFile(file){
-        state.file = file; state.offset = 0; state.header = null; state.lastWindowText=''; state.lastMatches=[]; state.lastMatchesHeader=null; state.totalLines=0;
-        updateMeta();
-        updateStats(0, 0, 0);
-        log(`Archivo cargado: ${file.name} (${fmtBytes(file.size)})`);
-
-        setBusy(true, 'Leyendo cabecera…');
-        els.progressBar.style.width = '5%';
-        els.progressText.textContent = '5 %';
-        try {
-          const headSize = Math.min(16 * 1024, file.size || 0);
-          const headText = await readBlobText(file.slice(0, headSize), els.encodingSelect.value || 'utf-8');
-          const linesHead = headText.split(/\r?\n/).filter(Boolean);
-          const delim = detectDelimiter(linesHead.join('\n'));
-          let header = null;
-          if(linesHead.length) header = parseLine(linesHead[0], delim);
-          state.header = header;
-          state.delimiter = delim;
-          populateColumnSelect();
-          els.progressBar.style.width = '10%';
-          els.progressText.textContent = '10 %';
-          els.statusPill.textContent = 'Cabecera detectada';
-          updateMeta();
-          updateStats(linesHead.length, state.header ? state.header.length : 0, 0);
-        } catch(err) {
-          els.statusPill.textContent = 'Error en cabecera';
-          log(`Error leyendo cabecera: ${err.message}`);
-        } finally {
-          setBusy(false, els.statusPill.textContent);
-        }
-        setTimeout(() => requestAnimationFrame(() => readWindow(0, false)), 40);
-      }
-
-      function updateStats(lines, cols, rows){
-        els.statsCols.textContent = cols ? `${cols}` : '—';
-        els.statsLines.textContent = lines ? `${lines}` : '—';
-        els.statsRows.textContent = rows ? `${rows}` : '—';
-      }
-
-      function populateColumnSelect(){
-        const select = els.columnSelect;
-        const prev = select.value;
-        select.innerHTML = '<option value="">— ninguna —</option>';
-        if(state.header && state.header.length){
-          state.header.forEach((name, idx) => {
+      // Column Select dropdown populator
+      const populateColumnFilter = (header) => {
+        const prevVal = els.columnFilter.value;
+        els.columnFilter.innerHTML = '<option value="">— Todas las columnas —</option>';
+        if (header) {
+          header.forEach((col, idx) => {
             const opt = document.createElement('option');
-            opt.value = String(idx);
-            opt.textContent = name || `col_${idx+1}`;
-            select.appendChild(opt);
+            opt.value = idx;
+            opt.textContent = col || `Columna ${idx + 1}`;
+            els.columnFilter.appendChild(opt);
           });
         }
-        if(prev && select.querySelector(`option[value="${prev}"]`)) select.value = prev;
-      }
-
-      async function readWindow(offset = state.offset, resetHeader = false){
-        if(!state.file || state.busy) return;
-        setBusy(true, 'Leyendo ventana…');
-        try{
-          const chunkMB = Math.max(1, Number(els.chunkSizeInput.value) || 4);
-          const maxRows = Math.max(50, Number(els.maxRowsInput.value) || 200);
-          const encoding = els.encodingSelect.value || 'utf-8';
-          const rawDelim = els.delimiterSelect.value;
-          state.delimiter = rawDelim === 'auto' ? 'auto' : rawDelim;
-          const overlap = 64 * 1024;
-          const start = Math.max(0, offset === 0 ? 0 : offset - overlap);
-          const end = Math.min(state.file.size, offset + chunkMB * 1024 * 1024);
-          const text = await readBlobText(state.file.slice(start, end), encoding);
-          let usable = text;
-          if(start > 0){
-            const firstBreak = usable.search(/\r?\n/);
-            usable = firstBreak >= 0 ? usable.slice(firstBreak + 1) : usable;
-          }
-          const lastBreak = usable.lastIndexOf('\n');
-          if(lastBreak > 0) usable = usable.slice(0, lastBreak);
-          state.lastWindowText = usable; state.lastWindowStart = start; state.lastWindowEnd = end; state.offset = offset;
-          if(!usable.trim()) throw new Error('La ventana leída no contiene líneas completas decodificables.');
-          const delim = rawDelim === 'auto' ? detectDelimiter(usable.slice(0, 8000)) : (rawDelim === 'tab' ? '\t' : rawDelim);
-          state.delimiter = delim;
-          let lines = usable.split(/\r?\n/).filter(Boolean);
-          if(resetHeader || !state.header){
-            state.header = parseLine(lines.shift() || '', delim);
-          } else if (offset === 0 && lines.length && state.header?.join('\u0001') === parseLine(lines[0], delim).join('\u0001')) {
-            lines.shift();
-          }
-          const rows = [];
-          for(let i=0;i<lines.length && rows.length<maxRows;i++) rows.push(parseLine(lines[i], delim));
-          renderTable(state.header, rows);
-          els.windowInfo.textContent = `${fmtBytes(end - start)} · ${fmtBytes(start)} → ${fmtBytes(end)}`;
-          els.rowInfo.textContent = `${rows.length.toLocaleString('es-ES')} filas renderizadas`;
-          els.statusPill.textContent = rows.length ? 'Ventana cargada' : 'Ventana vacía';
-          updateMeta();
-          populateColumnSelect();
-          updateStats(state.totalLines, state.header ? state.header.length : 0, rows.length);
-          log(`Ventana ${fmtBytes(start)} → ${fmtBytes(end)} leída con delimitador ${humanDelimiter(delim)}. ${rows.length} filas mostradas.`);
-        } catch(err){
-          els.statusPill.textContent = 'Error';
-          log(`Error: ${err.message}`);
-        } finally { setBusy(false, els.statusPill.textContent); }
-      }
-
-      function renderTable(header, rows){
-        els.theadRow.innerHTML=''; els.tbody.innerHTML='';
-        const headers = (header && header.length ? header : ['col_1']);
-        headers.forEach((h, idx) => {
-          const th=document.createElement('th'); th.textContent = h || `col_${idx+1}`; els.theadRow.appendChild(th);
-        });
-        rows.forEach(r => {
-          const tr=document.createElement('tr');
-          headers.forEach((_, idx) => {
-            const td=document.createElement('td'); td.textContent = r[idx] ?? ''; tr.appendChild(td);
-          });
-          els.tbody.appendChild(tr);
-        });
-      }
-
-      function buildPredicate(){
-        const text = (els.searchText.value || '').trim();
-        const colVal = els.columnSelect.value;
-        const colIdx = colVal ? Number(colVal) : null;
-        if(!text && colIdx == null){
-          return null;
+        if (prevVal && els.columnFilter.querySelector(`option[value="${prevVal}"]`)) {
+          els.columnFilter.value = prevVal;
         }
-        const lowerNeedle = text.toLowerCase();
-        return row => {
-          const joined = row.join(' ').toLowerCase();
-          if(lowerNeedle && !joined.includes(lowerNeedle)) return false;
-          if(colIdx != null){
-            const cell = (row[colIdx] || '').toLowerCase();
-            if(!cell.includes(lowerNeedle || '')) return false;
-          }
-          return true;
-        };
-      }
+      };
 
-      function searchInWindow(){
-        if(!state.lastWindowText){ log('No hay ventana cargada para buscar.'); return; }
-        const predicate = buildPredicate();
-        if(!predicate){ log('Define al menos un texto de búsqueda o columna.'); return; }
-        const maxRows = Math.max(50, Number(els.maxRowsInput.value) || 200);
-        const delim = state.delimiter === 'auto' ? detectDelimiter(state.lastWindowText.slice(0, 8000)) : state.delimiter;
-        const lines = state.lastWindowText.split(/\r?\n/).filter(Boolean);
-        let header = state.header ? [...state.header] : null;
-        let startIdx = 0;
-        if(!header && lines.length){
-          header = parseLine(lines[0], delim);
-          startIdx = 1;
-        }
-        const rows=[];
-        for(let i=startIdx;i<lines.length && rows.length<maxRows;i++){
-          const r = parseLine(lines[i], delim);
-          if(predicate(r)) rows.push(r);
-        }
-        renderTable(header, rows);
-        state.lastMatches = rows;
-        state.lastMatchesHeader = header;
-        els.rowInfo.textContent = `${rows.length.toLocaleString('es-ES')} filas coincidentes (ventana)`;
-        els.statusPill.textContent = rows.length ? 'Coincidencias en ventana' : 'Sin coincidencias en ventana';
-        updateStats(state.totalLines, header ? header.length : 0, rows.length);
-        log(`Búsqueda en ventana: ${rows.length} filas coincidentes renderizadas.`);
-      }
+      // Read a custom file chunk synchronously as string using TextDecoder
+      const readChunkText = async (file, start, end, encoding) => {
+        const blob = file.slice(start, end);
+        const buffer = await blob.arrayBuffer();
+        return new TextDecoder(encoding).decode(buffer);
+      };
 
-      async function searchGlobal(){
-        if(!state.file){ log('No hay archivo cargado para búsqueda global.'); return; }
-        const predicate = buildPredicate();
-        if(!predicate){ log('Define al menos un texto de búsqueda o columna para búsqueda global.'); return; }
-        const maxRows = Math.max(50, Number(els.maxRowsInput.value) || 200);
-        const chunkMB = Math.max(1, Number(els.chunkSizeInput.value) || 4);
-        const encoding = els.encodingSelect.value || 'utf-8';
-        state.searchAbort = false;
-        state.searchStartTime = performance.now();
-        els.searchState.textContent = 'running';
-        els.progressBar.style.width = '0%';
-        els.progressText.textContent = '0 %';
-        els.etaText.textContent = 'calculando…';
-        setBusy(true, 'Buscando en todo el archivo…');
-        try{
-          const results = [];
-          const overlap = 64 * 1024;
-          let cursor = 0;
-          let header = null;
-          let delim = state.delimiter;
-          let globalLines = 0;
-          while(cursor < state.file.size && results.length < maxRows){
-            if(state.searchAbort){
-              log('Búsqueda global cancelada por el usuario.');
-              break;
-            }
-            const start = Math.max(0, cursor === 0 ? 0 : cursor - overlap);
-            const end = Math.min(state.file.size, cursor + chunkMB * 1024 * 1024);
-            const text = await readBlobText(state.file.slice(start, end), encoding);
-            let usable = text;
-            if(start > 0){
-              const firstBreak = usable.search(/\r?\n/);
-              usable = firstBreak >= 0 ? usable.slice(firstBreak + 1) : usable;
-            }
-            const lastBreak = usable.lastIndexOf('\n');
-            if(lastBreak > 0) usable = usable.slice(0, lastBreak);
-            if(!usable.trim()){ cursor = end; continue; }
-            if(delim === 'auto') delim = detectDelimiter(usable.slice(0, 8000));
-            const lines = usable.split(/\r?\n/).filter(Boolean);
-            globalLines += lines.length;
-            let startIdx = 0;
-            if(!header && lines.length){
-              header = parseLine(lines[0], delim);
-              startIdx = 1;
-            }
-            for(let i=startIdx;i<lines.length && results.length<maxRows;i++){
-              const row = parseLine(lines[i], delim);
-              if(predicate(row)) results.push(row);
-            }
-            cursor = end;
-            const percent = Math.min(100, (cursor / state.file.size) * 100);
-            els.progressBar.style.width = `${percent}%`;
-            els.progressText.textContent = `${percent.toFixed(1)} %`;
-            const elapsed = (performance.now() - state.searchStartTime) / 1000;
-            if(elapsed > 0){
-              const bytesPerSec = cursor / elapsed;
-              const remainingBytes = state.file.size - cursor;
-              const etaSec = remainingBytes / bytesPerSec;
-              els.etaText.textContent = etaSec > 1 ? `~${etaSec.toFixed(1)} s` : '<1 s';
-            }
-            await new Promise(r => setTimeout(r, 0));
-          }
-          renderTable(header || state.header, results);
-          state.lastMatches = results;
-          state.lastMatchesHeader = header || state.header;
-          state.totalLines = globalLines;
-          els.rowInfo.textContent = `${results.length.toLocaleString('es-ES')} filas coincidentes (global)`;
-          els.statusPill.textContent = results.length ? 'Coincidencias globales' : (state.searchAbort ? 'Búsqueda cancelada' : 'Sin coincidencias globales');
-          updateStats(globalLines, header ? header.length : 0, results.length);
-          log(`Búsqueda global completada: ${results.length} filas coincidentes (tope ${maxRows}). Total líneas: ${globalLines}.`);
-        } catch(err){
-          log(`Error en búsqueda global: ${err.message}`);
-        } finally {
-          setBusy(false, els.statusPill.textContent);
-          els.searchState.textContent = state.searchAbort ? 'cancelled' : 'idle';
-          state.searchAbort = false;
-          els.etaText.textContent = '—';
-        }
-      }
+      // Overwrite or render CSV table
+      const renderTable = (header, rows) => {
+        els.tableHeader.innerHTML = '';
+        els.tableBody.innerHTML = '';
 
-      function cancelSearch(){
-        if(els.searchState.textContent === 'running'){
-          state.searchAbort = true;
-          els.searchState.textContent = 'cancelling';
-          log('Solicitud de cancelación de búsqueda global enviada.');
-        }
-      }
-
-      function exportWindow(){
-        if(!state.lastWindowText){ log('No hay ventana bruta para exportar. Lee primero una ventana.'); return; }
-        const blob = new Blob([state.lastWindowText], { type:'text/csv;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `${(state.file?.name || 'fragmento').replace(/\.[^.]+$/, '')}-ventana.csv`;
-        a.click(); URL.revokeObjectURL(a.href);
-        log('Ventana visible exportada como CSV bruto.');
-      }
-
-      function exportMatches(){
-        const rows = state.lastMatches || [];
-        const header = state.lastMatchesHeader || state.header;
-        if(!rows.length || !header){
-          log('No hay coincidencias en memoria para exportar. Ejecuta una búsqueda primero.');
+        if (!header || !rows.length) {
+          els.tableHeader.innerHTML = '<th>Sin datos coincidentes</th>';
+          els.tableBody.innerHTML = '<tr><td>No se encontraron filas en esta consulta o el bloque está vacío.</td></tr>';
           return;
         }
-        const delim = state.delimiter === 'auto' ? ',' : (state.delimiter === '\t' ? '\t' : state.delimiter);
-        const escapeCell = v => {
-          const s = (v ?? '').toString();
-          if(/["\n\r]/.test(s) || s.includes(delim)) return '"' + s.replace(/"/g,'""') + '"';
-          return s;
+
+        header.forEach(h => {
+          const th = document.createElement('th');
+          th.textContent = h || 'Columna';
+          els.tableHeader.appendChild(th);
+        });
+
+        rows.forEach(row => {
+          const tr = document.createElement('tr');
+          header.forEach((_, idx) => {
+            const td = document.createElement('td');
+            td.textContent = row[idx] !== undefined ? row[idx] : '';
+            tr.appendChild(td);
+          });
+          els.tableBody.appendChild(tr);
+        });
+      };
+
+      // Stream / Slice Loading Window Engine
+      const loadWindow = async (targetOffset, refreshHeader = false) => {
+        if (!state.file) return;
+
+        const maxRows = parseInt(els.maxRows.value, 10);
+        const chunkSizeMB = parseInt(els.chunkSize.value, 10);
+        const chunkSizeLimit = chunkSizeMB * 1024 * 1024;
+        const overlap = 64 * 1024; // safety margin for line restoration
+
+        const start = Math.max(0, targetOffset === 0 ? 0 : targetOffset - overlap);
+        const end = Math.min(state.file.size, targetOffset + chunkSizeLimit);
+
+        try {
+          const encoding = els.encSelect.value;
+          let text = await readChunkText(state.file, start, end, encoding);
+
+          if (start > 0) {
+            const firstNewline = text.indexOf('\n');
+            text = firstNewline !== -1 ? text.substring(firstNewline + 1) : text;
+          }
+
+          const lastNewline = text.lastIndexOf('\n');
+          text = lastNewline !== -1 ? text.substring(0, lastNewline) : text;
+
+          state.lastWindowText = text;
+
+          if (!text.trim()) {
+            log('El bloque actual está vacío o corrupto.', 'warning');
+            renderTable(null, []);
+            return;
+          }
+
+          const lines = text.split(/\r?\n/).filter(Boolean);
+          const delim = els.delimSelect.value === 'auto' ? detectDelimiter(text.substring(0, 10000)) : els.delimSelect.value;
+          state.delimiter = delim;
+
+          let finalHeader = state.header;
+          let dataStartIdx = 0;
+
+          if (refreshHeader || !finalHeader) {
+            finalHeader = parseCSVLine(lines[0], delim);
+            state.header = finalHeader;
+            dataStartIdx = 1;
+          } else if (targetOffset === 0 && lines.length) {
+            const firstCols = parseCSVLine(lines[0], delim);
+            if (firstCols.join('\u0001') === finalHeader.join('\u0001')) {
+              dataStartIdx = 1;
+            }
+          }
+
+          state.lastMatchesHeader = finalHeader;
+          populateColumnFilter(finalHeader);
+
+          // Render only a limit to protect performance
+          const parsedRows = [];
+          for (let i = dataStartIdx; i < lines.length && parsedRows.length < maxRows; i++) {
+            parsedRows.push(parseCSVLine(lines[i], delim));
+          }
+
+          state.lastMatches = parsedRows;
+          state.offset = targetOffset;
+
+          // UI metrics
+          els.statOffset.textContent = formatBytes(targetOffset);
+          els.statOffsetSub.textContent = `Progreso de lectura: ${((targetOffset / state.file.size) * 100).toFixed(1)}%`;
+          els.statRamUsage.textContent = formatBytes(text.length);
+
+          renderTable(finalHeader, parsedRows);
+          els.searchMetrics.textContent = `Mostrando ${parsedRows.length} de las ${lines.length} filas en este bloque`;
+
+          // Control buttons disable / enable
+          els.prevChunkBtn.disabled = targetOffset === 0;
+          els.nextChunkBtn.disabled = end >= state.file.size;
+          els.exportBtn.disabled = false;
+
+          log(`Bloque cargado en byte ${targetOffset.toLocaleString('es-ES')} (${formatBytes(end - start)}).`, 'success');
+
+        } catch (err) {
+          log(`Error leyendo bloque: ${err.message}`, 'error');
+        }
+      };
+
+      // File initializer
+      const initFile = async (file) => {
+        state.file = file;
+        state.offset = 0;
+        state.header = null;
+        state.lastMatches = [];
+
+        els.statFileName.textContent = file.name;
+        els.statFileSize.textContent = `Tamaño total: ${formatBytes(file.size)}`;
+
+        log(`Archivo cargado: "${file.name}" (${formatBytes(file.size)})`, 'info');
+
+        // Detect initial delim & header
+        try {
+          const headSlice = Math.min(16 * 1024, file.size);
+          const headText = await readChunkText(file, 0, headSlice, els.encSelect.value);
+          const lines = headText.split(/\r?\n/).filter(Boolean);
+          const delim = els.delimSelect.value === 'auto' ? detectDelimiter(lines.join('\n')) : els.delimSelect.value;
+          state.delimiter = delim;
+
+          if (lines.length) {
+            state.header = parseCSVLine(lines[0], delim);
+          }
+
+          log(`Delimitador detectado: "${delim === '	' ? '\\t' : delim}". Columnas: ${state.header?.length || 0}`, 'success');
+          loadWindow(0, true);
+        } catch (err) {
+          log(`Error al analizar cabecera: ${err.message}`, 'error');
+        }
+      };
+
+      // Local filter (within active chunk text buffer)
+      const filterLocal = () => {
+        if (!state.lastWindowText) {
+          log('No hay bloque de datos cargado en memoria.', 'warning');
+          return;
+        }
+
+        const query = els.searchQuery.value.trim().toLowerCase();
+        const colIdx = els.columnFilter.value !== "" ? parseInt(els.columnFilter.value, 10) : null;
+        const maxRows = parseInt(els.maxRows.value, 10);
+
+        log(`Filtrando ventana actual con query: "${query}"`, 'info');
+
+        const lines = state.lastWindowText.split(/\r?\n/).filter(Boolean);
+        let startIdx = 0;
+
+        if (state.offset === 0) {
+          const firstLineCols = parseCSVLine(lines[0], state.delimiter);
+          if (state.header && firstLineCols.join('\u0001') === state.header.join('\u0001')) {
+            startIdx = 1;
+          }
+        }
+
+        const matches = [];
+        for (let i = startIdx; i < lines.length && matches.length < maxRows; i++) {
+          const row = parseCSVLine(lines[i], state.delimiter);
+          let isMatch = false;
+
+          if (colIdx !== null) {
+            const cell = (row[colIdx] || '').toLowerCase();
+            isMatch = cell.includes(query);
+          } else {
+            isMatch = !query || row.some(cell => (cell || '').toLowerCase().includes(query));
+          }
+
+          if (isMatch) {
+            matches.push(row);
+          }
+        }
+
+        state.lastMatches = matches;
+        renderTable(state.header, matches);
+        els.searchMetrics.textContent = `Coincidencias en ventana: ${matches.length} (límit. ${maxRows})`;
+        log(`Filtro local completado. Encontradas ${matches.length} coincidencias.`, 'success');
+      };
+
+      // Highly efficient non-blocking global streaming search
+      const searchGlobal = async () => {
+        if (!state.file) {
+          log('Carga primero un archivo para iniciar la búsqueda.', 'warning');
+          return;
+        }
+
+        const query = els.searchQuery.value.trim().toLowerCase();
+        const colIdx = els.columnFilter.value !== "" ? parseInt(els.columnFilter.value, 10) : null;
+
+        if (!query && colIdx === null) {
+          log('Introduce un término o selecciona una columna para escanear el archivo entero.', 'warning');
+          return;
+        }
+
+        log(`Iniciando escaneo global secuencial para: "${query}"...`, 'info');
+
+        state.abortSearch = false;
+        state.isSearching = true;
+
+        els.progressSection.classList.remove('hidden');
+        els.cancelSearchBtn.classList.remove('hidden');
+        els.searchGlobalBtn.disabled = true;
+
+        const chunkSizeMB = parseInt(els.chunkSize.value, 10);
+        const chunkSizeLimit = chunkSizeMB * 1024 * 1024;
+        const overlap = 64 * 1024;
+        const maxRows = parseInt(els.maxRows.value, 10);
+        const totalSize = state.file.size;
+        const encoding = els.encSelect.value;
+
+        let cursor = 0;
+        const results = [];
+        const startTime = performance.now();
+
+        try {
+          while (cursor < totalSize && results.length < maxRows) {
+            if (state.abortSearch) {
+              log('Búsqueda global interrumpida de forma segura por el usuario.', 'warning');
+              break;
+            }
+
+            const start = Math.max(0, cursor === 0 ? 0 : cursor - overlap);
+            const end = Math.min(totalSize, cursor + chunkSizeLimit);
+
+            let text = await readChunkText(state.file, start, end, encoding);
+
+            if (start > 0) {
+              const firstNewline = text.indexOf('\n');
+              text = firstNewline !== -1 ? text.substring(firstNewline + 1) : text;
+            }
+
+            const lastNewline = text.lastIndexOf('\n');
+            text = lastNewline !== -1 ? text.substring(0, lastNewline) : text;
+
+            if (text.trim()) {
+              const lines = text.split(/\r?\n/).filter(Boolean);
+              const delim = state.delimiter;
+
+              let startIdx = 0;
+              if (cursor === 0) {
+                const firstCols = parseCSVLine(lines[0], delim);
+                if (state.header && firstCols.join('\u0001') === state.header.join('\u0001')) {
+                  startIdx = 1;
+                }
+              }
+
+              for (let i = startIdx; i < lines.length && results.length < maxRows; i++) {
+                const row = parseCSVLine(lines[i], delim);
+                let isMatch = false;
+
+                if (colIdx !== null) {
+                  const cell = (row[colIdx] || '').toLowerCase();
+                  isMatch = cell.includes(query);
+                } else {
+                  isMatch = row.some(cell => (cell || '').toLowerCase().includes(query));
+                }
+
+                if (isMatch) {
+                  results.push(row);
+                }
+              }
+            }
+
+            cursor = end;
+
+            // Stats calculations
+            const pct = Math.min(100, (cursor / totalSize) * 100);
+            const elapsedSeconds = (performance.now() - startTime) / 1000;
+            const speedMBs = (cursor / (1024 * 1024)) / (elapsedSeconds || 1);
+            const remainingMB = (totalSize - cursor) / (1024 * 1024);
+            const etaSeconds = speedMBs > 0 ? remainingMB / speedMBs : 0;
+
+            els.progressPercent.textContent = `${pct.toFixed(1)}%`;
+            els.progressBar.style.width = `${pct}%`;
+            els.progressSpeed.textContent = `Velocidad: ${speedMBs.toFixed(1)} MB/s (Procesados: ${formatBytes(cursor)})`;
+            els.progressEta.textContent = `ETA: ${etaSeconds > 0 ? etaSeconds.toFixed(1) + 's' : '—'}`;
+            els.searchMetrics.textContent = `Coincidencias encontradas: ${results.length}`;
+
+            // Yield frame back to preserve responsive rendering
+            await new Promise(r => setTimeout(r, 0));
+          }
+
+          state.lastMatches = results;
+          renderTable(state.header, results);
+          els.searchMetrics.textContent = `Resultados totales encontrados: ${results.length} (Tope renderizado: ${maxRows})`;
+          log(`Escaneo finalizado con éxito en ${((performance.now() - startTime) / 1000).toFixed(2)}s.`, 'success');
+
+        } catch (err) {
+          log(`Fallo durante escaneo global: ${err.message}`, 'error');
+        } finally {
+          state.isSearching = false;
+          els.progressSection.classList.add('hidden');
+          els.cancelSearchBtn.classList.add('hidden');
+          els.searchGlobalBtn.disabled = false;
+        }
+      };
+
+      // Local fast dummy generator to demonstrate big loads
+      const generateSample = () => {
+        log('Generando archivo ficticio masivo de 10.000 transacciones...', 'info');
+        const cols = ['transaccion_id', 'fecha', 'monto_usd', 'email', 'pais', 'metodo_pago', 'estado'];
+        const countries = ['España', 'Argentina', 'Chile', 'México', 'Colombia', 'Perú', 'EEUU', 'Alemania'];
+        const methods = ['Tarjeta de Crédito', 'PayPal', 'Bizum', 'Apple Pay', 'Google Pay'];
+        const statuses = ['Completada', 'Pendiente', 'Cancelada', 'Reembolsada'];
+
+        let content = cols.join(';') + '\n';
+        for (let i = 1; i <= 10000; i++) {
+          const date = new Date(2026, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0];
+          const amount = (Math.random() * 2000 + 1.99).toFixed(2);
+          const email = `test_usuario_${i}@correo.${['com', 'es', 'net'][Math.floor(Math.random() * 3)]}`;
+          const country = countries[Math.floor(Math.random() * countries.length)];
+          const method = methods[Math.floor(Math.random() * methods.length)];
+          const status = statuses[Math.floor(Math.random() * statuses.length)];
+          content += `TX-${100000 + i};${date};${amount};${email};${country};${method};${status}\n`;
+        }
+
+        const file = new File([content], 'simulacion_transacciones.csv', { type: 'text/csv' });
+        initFile(file);
+      };
+
+      // Export visible table matches
+      const exportCSV = () => {
+        if (!state.lastMatches.length || !state.lastMatchesHeader) {
+          log('No hay datos disponibles para exportar.', 'warning');
+          return;
+        }
+
+        const delim = state.delimiter === 'auto' || state.delimiter === '	' ? ';' : state.delimiter;
+        const escape = s => {
+          const str = (s ?? '').toString();
+          if (str.includes(delim) || str.includes('"') || str.includes('\n')) {
+            return `"${str.replace(/"/g, '""')}"`;
+          }
+          return str;
         };
+
         const lines = [];
-        lines.push(header.map(escapeCell).join(delim));
-        rows.forEach(r => lines.push(header.map((_, idx) => escapeCell(r[idx])).join(delim)));
+        lines.push(state.lastMatchesHeader.map(escape).join(delim));
+        state.lastMatches.forEach(row => {
+          lines.push(state.lastMatchesHeader.map((_, idx) => escape(row[idx])).join(delim));
+        });
+
         const csv = lines.join('\n');
-        const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `${(state.file?.name || 'fragmento').replace(/\.[^.]+$/, '')}-coincidencias.csv`;
-        a.click(); URL.revokeObjectURL(a.href);
-        log(`Exportadas ${rows.length} filas coincidentes a CSV.`);
-      }
+        a.download = `export_${state.file ? state.file.name : 'segmento'}`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        log(`Exportadas ${state.lastMatches.length} filas coincidentes.`, 'success');
+      };
 
-      function createSampleFile(){
-        let content = 'id;nombre;valor;nota\n';
-        for(let i=1;i<=5000;i++) content += `${i};fila_${i};${(Math.random()*1000).toFixed(2)};texto demo ${i}\n`;
-        return new File([content], 'demo-grande.csv', { type: 'text/csv' });
-      }
+      // Event bindings
+      els.browseBtn.addEventListener('click', () => els.fileInput.click());
+      els.fileInput.addEventListener('change', e => {
+        const file = e.target.files?.[0];
+        if (file) initFile(file);
+      });
 
-      // PWA: service worker auto-contenido
+      // Drag and Drop
+      ['dragenter', 'dragover'].forEach(name => {
+        els.dropzone.addEventListener(name, e => {
+          e.preventDefault();
+          els.dropzone.classList.add('dragover');
+        });
+      });
+      ['dragleave', 'drop'].forEach(name => {
+        els.dropzone.addEventListener(name, e => {
+          e.preventDefault();
+          els.dropzone.classList.remove('dragover');
+        });
+      });
+      els.dropzone.addEventListener('drop', e => {
+        const file = e.dataTransfer.files?.[0];
+        if (file) initFile(file);
+      });
+
+      els.chunkSize.addEventListener('input', () => {
+        els.chunkVal.textContent = `${els.chunkSize.value} MB`;
+      });
+      els.maxRows.addEventListener('input', () => {
+        els.rowsVal.textContent = els.maxRows.value;
+      });
+
+      els.prevChunkBtn.addEventListener('click', () => {
+        const step = parseInt(els.chunkSize.value, 10) * 1024 * 1024;
+        loadWindow(Math.max(0, state.offset - step));
+      });
+      els.nextChunkBtn.addEventListener('click', () => {
+        const step = parseInt(els.chunkSize.value, 10) * 1024 * 1024;
+        loadWindow(state.offset + step);
+      });
+
+      els.demoBtn.addEventListener('click', generateSample);
+      els.exportBtn.addEventListener('click', exportCSV);
+
+      els.searchLocalBtn.addEventListener('click', filterLocal);
+      els.searchGlobalBtn.addEventListener('click', searchGlobal);
+      els.cancelSearchBtn.addEventListener('click', () => {
+        state.abortSearch = true;
+      });
+      els.resetSearchBtn.addEventListener('click', () => {
+        els.searchQuery.value = '';
+        els.columnFilter.value = '';
+        if (state.file) loadWindow(state.offset);
+      });
+
+      // PWA service worker inline setup
       if ('serviceWorker' in navigator) {
-        const swCode = `
-          const CACHE_NAME = 'csv-chunker-v1';
-          self.addEventListener('install', event => {
-            event.waitUntil(
-              caches.open(CACHE_NAME).then(cache => {
-                cache.addAll(['./']);
-              })
-            );
+        const sw = `
+          const CACHE = 'csv-chunker-standalone-v1';
+          self.addEventListener('install', e => {
+            e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./'])));
             self.skipWaiting();
           });
-          self.addEventListener('activate', event => {
-            event.waitUntil(
-              caches.keys().then(names =>
-                Promise.all(
-                  names.filter(n => n !== CACHE_NAME).map(n => caches.delete(n))
-                )
-              )
-            );
+          self.addEventListener('activate', e => {
+            e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
             self.clients.claim();
           });
-          self.addEventListener('fetch', event => {
-            event.respondWith(
-              caches.match(event.request).then(res =>
-                res || fetch(event.request).then(resp => {
-                  const clone = resp.clone();
-                  caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-                  return resp;
-                })
-              )
+          self.addEventListener('fetch', e => {
+            if (e.request.method !== 'GET') return;
+            e.respondWith(
+              caches.match(e.request).then(res => res || fetch(e.request).then(resp => {
+                if (resp.status === 200) {
+                  const copy = resp.clone();
+                  caches.open(CACHE).then(c => c.put(e.request, copy));
+                }
+                return resp;
+              }))
             );
           });
         `;
-        const swBlob = new Blob([swCode], { type: 'text/javascript' });
-        const swUrl = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(swUrl).then(() => {
-          log('Service worker registrado correctamente.');
-        }).catch(err => {
-          log(`Error registrando service worker: ${err.message}`);
-        });
-      } else {
-        log('Este navegador no tiene soporte para service worker.');
+        const blob = new Blob([sw], { type: 'text/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(blob))
+          .then(reg => console.log('SW registrado offline.'))
+          .catch(err => console.warn('SW err:', err));
       }
-
-      // PWA: instalación
-      els.installBtn.addEventListener('click', async () => {
-        if (state.deferredPrompt) {
-          els.installBtn.textContent = 'Instalando…';
-          state.deferredPrompt.prompt();
-          const { outcome } = await state.deferredPrompt.userChoice;
-          log(`Instalación: ${outcome}`);
-          els.installBtn.textContent = 'Instalar app';
-          state.deferredPrompt = null;
-        } else {
-          log('Aún no está disponible la opción de instalación en este momento.');
-        }
-      });
 
       window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
         state.deferredPrompt = e;
-        log('Evento de instalación disponible. Usa el botón “Instalar app” para instalar.');
-      });
-      window.addEventListener('appinstalled', () => {
-        log('App instalada correctamente.');
-        els.installBtn.textContent = 'App instalada';
-        state.deferredPrompt = null;
+        els.installBtn.classList.remove('hidden');
       });
 
-      els.pickBtn.addEventListener('click', () => els.fileInput.click());
-      els.fileInput.addEventListener('change', e => { const f = e.target.files?.[0]; if(f) initFile(f); });
-      els.loadSampleBtn.addEventListener('click', async () => initFile(createSampleFile()));
-      ['dragenter','dragover'].forEach(type => els.dropzone.addEventListener(type, e => { e.preventDefault(); els.dropzone.classList.add('drag'); }));
-      ['dragleave','drop'].forEach(type => els.dropzone.addEventListener(type, e => { e.preventDefault(); els.dropzone.classList.remove('drag'); }));
-      els.dropzone.addEventListener('drop', e => { const f = e.dataTransfer.files?.[0]; if(f) initFile(f); });
-      els.dropzone.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' ') { e.preventDefault(); els.fileInput.click(); } });
-      els.readStartBtn.addEventListener('click', () => readWindow(0, true));
-      els.prevBtn.addEventListener('click', () => {
-        if(!state.file) return;
-        const step = Math.max(1, Number(els.chunkSizeInput.value) || 4) * 1024 * 1024;
-        readWindow(Math.max(0, state.offset - step), false);
+      els.installBtn.addEventListener('click', async () => {
+        if (!state.deferredPrompt) return;
+        state.deferredPrompt.prompt();
+        const { outcome } = await state.deferredPrompt.userChoice;
+        log(`Resultado de instalación: ${outcome}`, 'info');
+        state.deferredPrompt = null;
+        els.installBtn.classList.add('hidden');
       });
-      els.nextBtn.addEventListener('click', () => {
-        if(!state.file) return;
-        const step = Math.max(1, Number(els.chunkSizeInput.value) || 4) * 1024 * 1024;
-        readWindow(Math.min(Math.max(0, state.file.size || 0), state.offset + step), false);
-      });
-      els.exportWindowBtn.addEventListener('click', exportWindow);
-      els.exportMatchesBtn.addEventListener('click', exportMatches);
-      els.delimiterSelect.addEventListener('change', () => { if(state.file) readWindow(state.offset, true); });
-      els.encodingSelect.addEventListener('change', () => { if(state.file) readWindow(state.offset, true); });
-      els.searchWindowBtn.addEventListener('click', searchInWindow);
-      els.searchGlobalBtn.addEventListener('click', searchGlobal);
-      els.searchCancelBtn.addEventListener('click', cancelSearch);
-      els.searchResetBtn.addEventListener('click', () => {
-        els.searchText.value = ''; els.columnSelect.value = '';
-        state.lastMatches = []; state.lastMatchesHeader = null;
-        els.searchState.textContent = 'idle';
-        els.progressBar.style.width = '0%';
-        els.progressText.textContent = '0 %';
-        els.etaText.textContent = '—';
-        log('Búsqueda reseteada y coincidencias limpiadas.');
-      });
-      updateMeta();
-      updateStats(0, 0, 0);
-      log('App v7 PWA lista. Abre un CSV local para empezar.');
+
+      log('Visor CSV listo. Arrastra un archivo enorme para empezar sin demoras.', 'success');
     })();
   </script>
 </body>
