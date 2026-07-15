@@ -1,3 +1,4 @@
+<!-- CSV Chunker Viewer v7 PWA - última versión generada en chat -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -135,7 +136,7 @@
         <div class="panel-inner">
           <div class="dropzone" id="dropzone" tabindex="0" aria-label="Zona para soltar archivo CSV">
             <div>
-              <span class="pill">Offline · Local first · PWA</span>
+              <span class="pill">Offline · Local first · PWA v7</span>
               <h2 style="margin-top:1rem">Carga un CSV o TXT delimitado enorme</h2>
               <p>Lee por ventanas de bytes, detecta cabecera y busca coincidencias en todo el archivo sin reventar la RAM del móvil ni romper el layout con 67 columnas.</p>
             </div>
@@ -248,7 +249,8 @@
         theadRow: $('#theadRow'), tbody: $('#tbody'), log: $('#log'), searchText: $('#searchText'),
         columnSelect: $('#columnSelect'), searchWindowBtn: $('#searchWindowBtn'), searchGlobalBtn: $('#searchGlobalBtn'),
         searchCancelBtn: $('#searchCancelBtn'), searchResetBtn: $('#searchResetBtn'), installBtn: $('#installBtn'),
-        statsCols: $('#statsCols'), statsLines: $('#statsLines'), statsRows: $('#statsRows')
+        statsCols: $('#statsCols'), statsLines: $('#statsLines'), statsRows: $('#statsRows'),
+        manifestLink: $('#manifestLink')
       };
 
       const state = {
@@ -731,10 +733,41 @@
       els.pickBtn.addEventListener('click', () => els.fileInput.click());
       els.fileInput.addEventListener('change', e => { const f = e.target.files?.[0]; if(f) initFile(f); });
       els.loadSampleBtn.addEventListener('click', async () => initFile(createSampleFile()));
-      ['dragenter','dragover'].forEach(type => el
-</parameter=queries>
-<parameter=tool>
-search_web
-</parameter>
-</function>
-</tool_call>
+      ['dragenter','dragover'].forEach(type => els.dropzone.addEventListener(type, e => { e.preventDefault(); els.dropzone.classList.add('drag'); }));
+      ['dragleave','drop'].forEach(type => els.dropzone.addEventListener(type, e => { e.preventDefault(); els.dropzone.classList.remove('drag'); }));
+      els.dropzone.addEventListener('drop', e => { const f = e.dataTransfer.files?.[0]; if(f) initFile(f); });
+      els.dropzone.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' ') { e.preventDefault(); els.fileInput.click(); } });
+      els.readStartBtn.addEventListener('click', () => readWindow(0, true));
+      els.prevBtn.addEventListener('click', () => {
+        if(!state.file) return;
+        const step = Math.max(1, Number(els.chunkSizeInput.value) || 4) * 1024 * 1024;
+        readWindow(Math.max(0, state.offset - step), false);
+      });
+      els.nextBtn.addEventListener('click', () => {
+        if(!state.file) return;
+        const step = Math.max(1, Number(els.chunkSizeInput.value) || 4) * 1024 * 1024;
+        readWindow(Math.min(Math.max(0, state.file.size || 0), state.offset + step), false);
+      });
+      els.exportWindowBtn.addEventListener('click', exportWindow);
+      els.exportMatchesBtn.addEventListener('click', exportMatches);
+      els.delimiterSelect.addEventListener('change', () => { if(state.file) readWindow(state.offset, true); });
+      els.encodingSelect.addEventListener('change', () => { if(state.file) readWindow(state.offset, true); });
+      els.searchWindowBtn.addEventListener('click', searchInWindow);
+      els.searchGlobalBtn.addEventListener('click', searchGlobal);
+      els.searchCancelBtn.addEventListener('click', cancelSearch);
+      els.searchResetBtn.addEventListener('click', () => {
+        els.searchText.value = ''; els.columnSelect.value = '';
+        state.lastMatches = []; state.lastMatchesHeader = null;
+        els.searchState.textContent = 'idle';
+        els.progressBar.style.width = '0%';
+        els.progressText.textContent = '0 %';
+        els.etaText.textContent = '—';
+        log('Búsqueda reseteada y coincidencias limpiadas.');
+      });
+      updateMeta();
+      updateStats(0, 0, 0);
+      log('App v7 PWA lista. Abre un CSV local para empezar.');
+    })();
+  </script>
+</body>
+</html>
