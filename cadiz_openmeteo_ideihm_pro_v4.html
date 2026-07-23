@@ -1,81 +1,1428 @@
-<!doctype html>
-<html lang="es">
+<!DOCTYPE html>
+<html lang="es" id="htmlRoot" class="min-h-screen lg:h-screen lg:overflow-hidden theme-ocean">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cádiz · Open-Meteo + IdeIHM Pro</title>
-<style>
-:root{--bg:#07111f;--panel:#0f1726;--line:#20314d;--text:#edf3ff;--muted:#95a9c8;--accent:#77d4ff;--good:#7ee787;--warn:#ffd166;--bad:#ff8a80;--shadow:0 16px 40px rgba(0,0,0,.28)}
-*{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at top,#13233d 0,#07111f 55%);color:var(--text);transition:background .35s ease}
-.wrap{max-width:1600px;margin:0 auto;padding:14px;display:grid;gap:14px;grid-template-areas:'top' 'hero' 'main' 'sources'}
-.box{background:linear-gradient(180deg,rgba(15,23,38,.95),rgba(12,18,31,.95));border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
-.top{grid-area:top;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.title h1{margin:0;font-size:24px}.title p{margin:4px 0 0;color:var(--muted);font-size:13px}.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--muted);font-size:12px}
-.hero{grid-area:hero;padding:14px;display:grid;grid-template-columns:1.1fr .9fr;gap:12px}.weathercard{padding:18px;border-radius:20px;background:linear-gradient(135deg,rgba(119,212,255,.12),rgba(255,255,255,.03));border:1px solid rgba(119,212,255,.16);min-height:180px}.weatherbig{display:flex;align-items:center;gap:16px;height:100%}.weathericon{font-size:72px;line-height:1}.weathermeta h2{margin:0;font-size:26px}.weathermeta p{margin:6px 0 0;color:var(--muted);font-size:14px}.weatherline{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}.weatherline .pill{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-size:12px}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric{padding:14px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}.metric .k{font-size:12px;color:var(--muted)}.metric .v{font-size:20px;font-weight:700;margin-top:4px}.metric .d{font-size:12px;color:var(--muted);margin-top:4px}.metric .sym{margin-right:6px}.temp-cold{color:#7dd3fc}.temp-mid{color:#fbbf24}.temp-hot{color:#fb7185}.bar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:8px}.bar>span{display:block;height:100%;border-radius:999px}
-.main{grid-area:main;padding:14px;display:grid;grid-template-columns:1.05fr .95fr;gap:12px;min-width:0}.panel{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:18px;padding:14px;min-width:0}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.panel-head h2{margin:0;font-size:16px}.badge{padding:6px 10px;border-radius:999px;background:rgba(119,212,255,.08);border:1px solid rgba(119,212,255,.18);color:#cdefff;font-size:12px}
-.tidecards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}.tidecard{padding:14px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}.tidecard.high{background:linear-gradient(135deg,rgba(125,211,252,.18),rgba(255,255,255,.04));border-color:rgba(125,211,252,.35)}.tidecard.low{background:linear-gradient(135deg,rgba(253,186,116,.18),rgba(255,255,255,.04));border-color:rgba(253,186,116,.35)}.tidecard .k{font-size:12px;color:var(--muted)}.tidecard .v{font-size:22px;font-weight:700;margin-top:6px}.tidecard .d{font-size:12px;color:var(--muted);margin-top:4px}.delta{margin-top:8px;font-size:12px;color:#dbe7ff}
-.timeline{margin:10px 0 12px;position:relative;height:72px;padding:10px 8px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);overflow:hidden}.timeline::before{content:'';position:absolute;left:20px;right:20px;top:50%;height:4px;transform:translateY(-50%);background:linear-gradient(90deg,rgba(255,255,255,.12),rgba(255,255,255,.34),rgba(255,255,255,.12));border-radius:999px}.tmark{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:3px}.tmark .dot{width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.08)}.tmark.high .dot{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid #22c55e;border-radius:0;background:transparent;box-shadow:none}.tmark.low .dot{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:14px solid #ef4444;border-radius:0;background:transparent;box-shadow:none}.tmark.now .dot{width:12px;height:12px;border-radius:50%;background:#3b82f6;box-shadow:0 0 0 5px rgba(59,130,246,.14)}.tmark .lbl{font-size:11px;color:var(--muted)}.tmark .time{font-size:11px;font-weight:700}
-.gridlist{display:grid;gap:10px}.day{display:grid;grid-template-columns:160px 1fr;gap:12px;align-items:center;padding:12px 0;border-top:1px solid rgba(255,255,255,.06)}.day:first-child{border-top:none}.day .date{font-weight:700;font-size:15px}.day .desc{color:var(--muted);font-size:13px;margin-top:2px}.icon{font-size:34px;line-height:1}.vals{display:flex;flex-wrap:wrap;gap:8px}.pill{padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.05);font-size:12px;color:#dfe9fb}
-.tide-table{width:100%;border-collapse:collapse;font-size:13px}.tide-table th,.tide-table td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left}.tide-table th{color:var(--muted);font-weight:600}.tide-table td.num{text-align:right;font-variant-numeric:tabular-nums}.small{color:var(--muted);font-size:12px}.err{display:none;margin-top:10px;padding:12px;border-radius:12px;border:1px solid rgba(255,138,128,.35);background:rgba(255,138,128,.08);color:#ffd5d1;font-size:13px}
-.sources{grid-area:sources;padding:14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.src{padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05)}.src h3{margin:0 0 8px;font-size:15px}.src p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}.status{font-size:12px;color:var(--muted)}
-@media (max-width:1100px){.hero,.main,.sources{grid-template-columns:1fr}.metrics,.tidecards{grid-template-columns:repeat(2,1fr)}.wrap{grid-template-areas:'top' 'hero' 'main' 'sources'}}
-@media (max-width:720px){.metrics,.tidecards{grid-template-columns:1fr}.day{grid-template-columns:1fr}.sources{grid-template-columns:1fr}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cádiz Meteo & Mareas · Playa Santa María del Mar</title>
+  
+  <!-- Embedded PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CádizMeteo" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230f172a'/><path d='M256 90c-75 0-136 61-136 136 0 95 136 216 136 216s136-121 136-216c0-75-61-136-136-136zm0 185c-27 0-49-22-49-49s22-49 49-49 49 22 49 49-22 49-49 49z' fill='%2338bdf8'/><path d='M120 380c40-20 80 10 120 0s80-20 120 0s80-10 120 0' stroke='%2338bdf8' stroke-width='24' fill='none' stroke-linecap='round'/></svg>" />
+
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { dark: '#0b1322' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* RADICAL THEME PRESETS OVERRIDING ALL BG, TEXT, CARDS AND ACCENTS */
+    .theme-ocean {
+      --bg-color: #0b1322;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --card-bg-start: rgba(15, 23, 42, 0.92);
+      --card-bg-end: rgba(30, 41, 59, 0.85);
+      --inner-card: rgba(15, 23, 42, 0.95);
+      --accent-color: #38bdf8;
+      --accent-border: rgba(56, 189, 248, 0.35);
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --svg-curve: #38bdf8;
+      --svg-fill-start: rgba(56, 189, 248, 0.35);
+      --svg-fill-stop: rgba(56, 189, 248, 0.02);
+    }
+
+    .theme-day {
+      --bg-color: #f0f4f8;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --card-bg-start: rgba(255, 255, 255, 0.95);
+      --card-bg-end: rgba(241, 245, 249, 0.92);
+      --inner-card: rgba(226, 232, 240, 0.85);
+      --accent-color: #0284c7;
+      --accent-border: rgba(2, 132, 199, 0.45);
+      --border-subtle: rgba(15, 23, 42, 0.12);
+      --svg-curve: #0284c7;
+      --svg-fill-start: rgba(2, 132, 199, 0.3);
+      --svg-fill-stop: rgba(2, 132, 199, 0.03);
+    }
+
+    .theme-sunset {
+      --bg-color: #210a18;
+      --text-main: #fff1f2;
+      --text-muted: #f472b6;
+      --card-bg-start: rgba(45, 12, 34, 0.92);
+      --card-bg-end: rgba(70, 20, 52, 0.85);
+      --inner-card: rgba(35, 10, 26, 0.95);
+      --accent-color: #fb7185;
+      --accent-border: rgba(251, 113, 133, 0.5);
+      --border-subtle: rgba(255, 255, 255, 0.12);
+      --svg-curve: #fb7185;
+      --svg-fill-start: rgba(251, 113, 133, 0.35);
+      --svg-fill-stop: rgba(251, 113, 133, 0.02);
+    }
+
+    .theme-emerald {
+      --bg-color: #041913;
+      --text-main: #ecfdf5;
+      --text-muted: #6ee7b7;
+      --card-bg-start: rgba(6, 44, 33, 0.92);
+      --card-bg-end: rgba(13, 62, 48, 0.85);
+      --inner-card: rgba(4, 30, 23, 0.95);
+      --accent-color: #34d399;
+      --accent-border: rgba(52, 211, 153, 0.45);
+      --border-subtle: rgba(255, 255, 255, 0.12);
+      --svg-curve: #34d399;
+      --svg-fill-start: rgba(52, 211, 153, 0.35);
+      --svg-fill-stop: rgba(52, 211, 153, 0.02);
+    }
+
+    .theme-gold {
+      --bg-color: #1a1408;
+      --text-main: #fefce8;
+      --text-muted: #fde047;
+      --card-bg-start: rgba(45, 34, 12, 0.92);
+      --card-bg-end: rgba(65, 48, 18, 0.85);
+      --inner-card: rgba(30, 22, 8, 0.95);
+      --accent-color: #facc15;
+      --accent-border: rgba(250, 204, 21, 0.5);
+      --border-subtle: rgba(255, 255, 255, 0.12);
+      --svg-curve: #facc15;
+      --svg-fill-start: rgba(250, 204, 21, 0.35);
+      --svg-fill-stop: rgba(250, 204, 21, 0.02);
+    }
+
+    .theme-cyber {
+      --bg-color: #0d0221;
+      --text-main: #f0f0ff;
+      --text-muted: #c084fc;
+      --card-bg-start: rgba(26, 8, 56, 0.92);
+      --card-bg-end: rgba(45, 12, 80, 0.85);
+      --inner-card: rgba(18, 4, 38, 0.95);
+      --accent-color: #a855f7;
+      --accent-border: rgba(168, 85, 247, 0.55);
+      --border-subtle: rgba(224, 231, 255, 0.15);
+      --svg-curve: #c084fc;
+      --svg-fill-start: rgba(192, 132, 252, 0.35);
+      --svg-fill-stop: rgba(192, 132, 252, 0.02);
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    /* Smart TV Focus Ring for Remote D-Pad Navigation */
+    [data-tv-focusable="true"]:focus,
+    button:focus-visible,
+    select:focus-visible,
+    a:focus-visible {
+      outline: none !important;
+      border-color: var(--accent-color) !important;
+      box-shadow: 0 0 0 4px var(--accent-color), 0 0 25px var(--accent-color) !important;
+      transform: scale(1.02);
+      transition: all 0.15s ease;
+      z-index: 40;
+    }
+
+    /* Premium Glassmorphic Panels */
+    .glass-panel {
+      background: linear-gradient(135deg, var(--card-bg-start) 0%, var(--card-bg-end) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.4);
+    }
+
+    .glass-panel-glow {
+      background: linear-gradient(135deg, var(--card-bg-start) 0%, var(--card-bg-end) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--accent-border);
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.12);
+    }
+
+    .card-inner {
+      background-color: var(--inner-card);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* TV 10-Foot UI Mode */
+    .tv-mode-active {
+      font-size: 1.1rem;
+    }
+    .tv-mode-active .tv-title { font-size: 1.8rem !important; }
+    .tv-mode-active .tv-hero { font-size: 3.8rem !important; }
+
+    /* Subtle pulse for live indicator */
+    @keyframes pulse-red {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(1.2); }
+    }
+    .live-pulse { animation: pulse-red 1.8s ease-in-out infinite; }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.9; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+    .water-pulse { animation: pulse-glow 2s ease-in-out infinite; }
+  </style>
 </head>
-<body>
-<div class="wrap">
-  <header class="top box">
-    <div class="title"><h1>Cádiz · Open-Meteo + IdeIHM Pro</h1><p>Temperaturas con colores, lluvia y viento correctos, y marea visual clara.</p></div>
-    <div class="chips"><span class="chip">Open-Meteo</span><span class="chip">IdeIHM</span><span class="chip">Cádiz</span><span class="chip">Pro</span></div>
-  </header>
+<body class="min-h-screen lg:h-screen lg:overflow-hidden p-2 sm:p-3 md:p-3.5 selection:bg-cyan-500 selection:text-white flex flex-col justify-between">
 
-  <section class="hero box" id="heroBox">
-    <div class="weathercard">
-      <div class="weatherbig"><div class="weathericon" id="heroIcon">☀️</div><div class="weathermeta"><h2 id="heroTitle">--</h2><p id="heroSub">--</p><div class="weatherline" id="heroPills"></div></div></div>
+  <!-- MAIN APP CONTAINER (Scales to full height on TV displays without scrolling) -->
+  <div id="app" class="max-w-[1750px] w-full mx-auto h-full flex flex-col justify-between gap-1.5">
+    
+    <!-- APP HEADER (Compact Top Bar) -->
+    <header class="glass-panel rounded-xl px-3 py-1.5 flex flex-col sm:flex-row items-center justify-between gap-2 shadow-xl shrink-0">
+      <div class="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-start">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-500 flex items-center justify-center text-white text-lg font-bold shadow-md shadow-cyan-500/20 border border-white/20">
+            🌊
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h1 class="text-base sm:text-lg font-black tracking-tight tv-title leading-tight">
+                Cádiz Meteo & Mareas
+              </h1>
+              <span class="bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full hidden md:inline-block">
+                PWA Local-First
+              </span>
+            </div>
+            <p class="text-[10px] font-medium leading-none opacity-80">
+              📍 Playa Santa María del Mar · Cádiz
+            </p>
+          </div>
+        </div>
+
+        <button id="btnTvToggleMobile" onclick="toggleTvMode()" class="sm:hidden p-1.5 rounded-lg border card-inner text-xs" data-tv-focusable="true" title="Modo TV">
+          📺
+        </button>
+      </div>
+
+      <!-- Theme Selector, Controls & Clock -->
+      <div class="flex items-center gap-2 flex-wrap justify-center sm:justify-end w-full sm:w-auto">
+        
+        <!-- THEME SELECTOR DROPDOWN -->
+        <div class="flex items-center gap-1.5 card-inner rounded-lg px-2 py-1">
+          <span class="text-xs select-none">🎨</span>
+          <select id="themeSelect" onchange="changeTheme(this.value)" class="bg-transparent text-xs font-bold focus:outline-none cursor-pointer" data-tv-focusable="true">
+            <option value="ocean" class="bg-slate-900 text-white">🌊 Atlántico Noche (Azul)</option>
+            <option value="day" class="bg-slate-100 text-slate-900">☀️ Sol de Cádiz (Día Claro)</option>
+            <option value="sunset" class="bg-slate-900 text-white">🌅 La Caleta (Atardecer Coral)</option>
+            <option value="emerald" class="bg-slate-900 text-white">🌿 Costa Esmeralda (Verde)</option>
+            <option value="gold" class="bg-slate-900 text-white">🏆 Sol Dorado (Ámbar)</option>
+            <option value="cyber" class="bg-slate-900 text-white">🌌 Neón Gaditano (Violeta)</option>
+          </select>
+        </div>
+
+        <div class="card-inner rounded-lg px-2.5 py-1 text-right">
+          <span id="clockTime" class="text-xs font-bold tracking-wider block leading-none">--:--:--</span>
+          <span id="clockDate" class="text-[10px] opacity-75 capitalize block mt-0.5 leading-none">--</span>
+        </div>
+
+        <span id="onlineBadge" class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-1 rounded-lg">
+          🟢 Online
+        </span>
+
+        <button id="btnPwaInstall" onclick="triggerPwaInstall()" class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs px-2.5 py-1 rounded-lg border border-cyan-400/40 shadow-md flex items-center gap-1" data-tv-focusable="true">
+          📥 Instalar PWA
+        </button>
+
+        <button id="btnTvToggleDesktop" onclick="toggleTvMode()" class="hidden sm:flex card-inner text-xs font-bold px-2.5 py-1 rounded-lg items-center gap-1" data-tv-focusable="true">
+          📺 <span id="tvModeLabel">Modo TV</span>
+        </button>
+
+        <button onclick="loadAllData()" class="card-inner p-1.5 rounded-lg text-xs" data-tv-focusable="true" title="Actualizar datos">
+          🔄
+        </button>
+      </div>
+    </header>
+
+    <!-- QUICK METRICS BAR (6 Compact High-Contrast Cards) -->
+    <div id="quickMetrics" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 shrink-0">
+      <!-- Injected via JS -->
     </div>
-    <div class="metrics" id="metrics"></div>
-  </section>
 
-  <section class="main box">
-    <article class="panel"><div class="panel-head"><h2>Tiempo</h2><span class="badge">Open-Meteo</span></div><div class="gridlist" id="weatherList"></div><div class="err" id="weatherErr"></div></article>
-    <article class="panel"><div class="panel-head"><h2>Mareas Cádiz</h2><span class="badge" id="tideBadge">IdeIHM</span></div><div class="tidecards"><div class="tidecard high"><div class="k">Pleamar próxima</div><div class="v" id="khigh">--</div><div class="d">IdeIHM</div><div class="delta" id="highDelta">--</div></div><div class="tidecard low"><div class="k">Bajamar próxima</div><div class="v" id="klow">--</div><div class="d">IdeIHM</div><div class="delta" id="lowDelta">--</div></div></div><div class="timeline" id="timeline"></div><table class="tide-table"><thead><tr><th>Hora</th><th>Tipo</th><th class="num">Altura</th></tr></thead><tbody id="tideBody"></tbody></table><div class="small" id="tideNote"></div><div class="err" id="tideErr"></div></article>
-  </section>
+    <!-- MAIN 3-COLUMN TV DASHBOARD GRID (Fits strictly inside 100vh on TV/Desktop) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-1.5 flex-1 min-h-0">
+      
+      <!-- COLUMN 1: ENRICHED WEATHER, ATMOSPHERIC SPECS & 24H FORECAST (4 Cols on lg) -->
+      <div class="lg:col-span-4 glass-panel rounded-xl p-2.5 flex flex-col justify-between overflow-hidden">
+        <div class="flex flex-col h-full justify-between gap-1">
+          
+          <!-- Hero Section -->
+          <div class="flex items-center justify-between pb-1.5 border-b border-white/10">
+            <div class="flex items-center gap-2">
+              <div id="heroIcon" class="text-4xl sm:text-5xl select-none leading-none">🌤️</div>
+              <div>
+                <div class="flex items-baseline gap-1.5">
+                  <span id="heroTemp" class="text-3xl sm:text-4xl font-black tracking-tight tv-hero leading-none">--°C</span>
+                  <span id="heroApparent" class="text-[10px] font-semibold opacity-75">Sens. --°C</span>
+                </div>
+                <h2 id="heroDesc" class="text-xs font-bold text-cyan-400 capitalize mt-0.5">Cargando...</h2>
+              </div>
+            </div>
 
-  <section class="sources box">
-    <div class="src"><h3>IdeIHM</h3><p>El próximo extremo se calcula comparando la hora local actual con las horas de mareas del día.</p></div>
-    <div class="src"><h3>Visual</h3><p>La pleamar es triángulo verde arriba, la bajamar triángulo rojo abajo y el ahora un punto azul.</p></div>
-    <div class="src"><h3>Estado</h3><p class="status" id="statusText">Listo para cargar.</p></div>
-  </section>
-</div>
-<script>
-const el=id=>document.getElementById(id);
-const CADIZ={lat:36.527061,lon:-6.288596};
-const weatherCache = localStorage.getItem('weather_cache_pro_v4');
-function iconFor(code){const m={0:['☀️','Soleado'],1:['🌤️','Poco nuboso'],2:['⛅','Parcialmente nublado'],3:['☁️','Nublado'],45:['🌫️','Niebla'],48:['🌫️','Niebla'],51:['🌦️','Llovizna'],53:['🌦️','Llovizna'],55:['🌦️','Llovizna'],61:['🌧️','Lluvia'],63:['🌧️','Lluvia'],65:['🌧️','Lluvia'],71:['❄️','Nieve'],80:['🌦️','Chubascos'],81:['🌦️','Chubascos'],82:['🌧️','Chubascos'],95:['⛈️','Tormenta']}; return m[code]||['❔','Desconocido'];}
-function tempClass(v){if(v>=30) return 'temp-hot'; if(v>=22) return 'temp-mid'; return 'temp-cold';}
-function rainLevel(v){ v=Number(v)||0; if(v<1) return {sym:'▫️',bar:8,color:'#94a3b8',label:'Muy poca'}; if(v<5) return {sym:'▂',bar:22,color:'#60a5fa',label:'Ligera'}; if(v<15) return {sym:'▅',bar:50,color:'#3b82f6',label:'Moderada'}; return {sym:'█',bar:86,color:'#1d4ed8',label:'Fuerte'}; }
-function windLevel(v){ v=Number(v)||0; if(v<15) return {sym:'🍃',bar:15,color:'#7dd3fc',label:'Suave'}; if(v<30) return {sym:'💨',bar:45,color:'#38bdf8',label:'Moderado'}; if(v<50) return {sym:'🌬️',bar:75,color:'#0ea5e9',label:'Fuerte'}; return {sym:'🌀',bar:95,color:'#0284c7',label:'Muy fuerte'}; }
-function renderWeather(rows){ el('weatherList').innerHTML=rows.map(r=>`<div class="day"><div><div class="icon">${r.icon}</div><div class="date">${r.day}</div><div class="desc">${r.desc}</div></div><div><div class="vals"><span class="pill">Máx ${r.tmax}</span><span class="pill">Mín ${r.tmin}</span><span class="pill">Lluvia ${r.rain}</span><span class="pill">Viento ${r.wind}</span></div></div></div>`).join(''); }
-function renderTides(rows){ el('tideBody').innerHTML=rows.length?rows.map(r=>`<tr><td>${r.hora}</td><td>${r.tipo}</td><td class="num">${r.altura} m</td></tr>`).join(''):'<tr><td colspan="3">Sin datos</td></tr>'; }
-function renderMetrics(w){ el('metrics').innerHTML=[
-  {k:'Máxima',v:w.maxT,sym:'🌡️',cls:w.maxCls,label:'Temperatura alta'},
-  {k:'Mínima',v:w.minT,sym:'🧊',cls:w.minCls,label:'Temperatura baja'},
-  {k:'Lluvia',v:w.rain,sym:w.rainSym,bar:w.rainBar,color:w.rainColor,label:w.rainLabel},
-  {k:'Viento',v:w.wind,sym:w.windSym,bar:w.windBar,color:w.windColor,label:w.windLabel}
-].map(x=>`<div class="metric"><div class="k">${x.k}</div><div class="v ${x.cls||''}"><span class="sym">${x.sym}</span>${x.v}</div><div class="d">${x.label||''}</div>${x.bar!=null?`<div class="bar"><span style="width:${x.bar}%;background:${x.color}"></span></div>`:''}</div>`).join(''); }
-async function getWeather(){ const j=await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${CADIZ.lat}&longitude=${CADIZ.lon}&timezone=Europe%2FMadrid&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weathercode,wind_speed_10m_max&forecast_days=7`,{mode:'cors'})).json(); const d=j.daily||{}; return (d.time||[]).map((t,i)=>{ const ic=iconFor(d.weathercode?.[i]); const rainv=Number(d.precipitation_sum?.[i]||0); const windv=Number(d.wind_speed_10m_max?.[i]||0); const tmax=Number(d.temperature_2m_max?.[i]||0), tmin=Number(d.temperature_2m_min?.[i]||0); const rl=rainLevel(rainv), wl=windLevel(windv); return {day:new Date(t).toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'2-digit'}),icon:ic[0],desc:ic[1],tmax:`${tmax.toFixed(0)}°C`,tmin:`${tmin.toFixed(0)}°C`,rain:`${rainv.toFixed(1)} mm`,wind:`${windv.toFixed(0)} km/h`,maxCls:tempClass(tmax),minCls:tempClass(tmin),rainSym:rl.sym,rainBar:rl.bar,rainColor:rl.color,rainLabel:rl.label,windSym:wl.sym,windBar:wl.bar,windColor:wl.color,windLabel:wl.label}; }); }
-async function loadIdeIhm(){ const r=await fetch('https://ideihm.covam.es/api-ihm/getmarea?request=gettide&id=42&format=json',{mode:'cors'}); return await r.json(); }
-function normalizeIdeIhm(obj){ return (obj?.mareas?.datos?.marea || []).map(x=>({tipo:x.tipo.charAt(0).toUpperCase()+x.tipo.slice(1), hora:x.hora, altura:x.altura})); }
-function nextTides(rows){ const now=new Date(); const minsNow=now.getHours()*60+now.getMinutes(); const toMin=t=>{const [h,m]=t.split(':').map(Number); return h*60+m}; const sorted=rows.map(r=>({...r,mins:toMin(r.hora)})).sort((a,b)=>a.mins-b.mins); return {high:sorted.find(r=>r.tipo.toLowerCase().includes('pleamar') && r.mins>=minsNow) || sorted.find(r=>r.tipo.toLowerCase().includes('pleamar')), low:sorted.find(r=>r.tipo.toLowerCase().includes('bajamar') && r.mins>=minsNow) || sorted.find(r=>r.tipo.toLowerCase().includes('bajamar')), sorted, nowMin:minsNow}; }
-function deltaText(target){ if(!target) return '--'; const [h,m]=target.hora.split(':').map(Number); const now=new Date(); let diff=((h*60+m) - (now.getHours()*60+now.getMinutes())); if(diff<0) diff += 24*60; const hh=Math.floor(diff/60), mm=diff%60; return `en ${hh}h ${mm}m`; }
-function buildTimeline(sorted, nowMin){ const box=el('timeline'); box.innerHTML=''; const toMin=t=>{const [h,m]=t.split(':').map(Number); return h*60+m}; const points=sorted.map(r=>({label:r.tipo, time:r.hora, mins:toMin(r.hora), cls:r.tipo.toLowerCase().includes('pleamar')?'high':'low'})); points.push({label:'Ahora', time:`${String(new Date().getHours()).padStart(2,'0')}:${String(new Date().getMinutes()).padStart(2,'0')}`, mins:nowMin, cls:'now'}); points.sort((a,b)=>a.mins-b.mins); const min=points[0].mins, max=points[points.length-1].mins, span=Math.max(1,max-min); points.forEach(p=>{ const d=document.createElement('div'); d.className=`tmark ${p.cls}`; d.style.left=`${20 + 60*((p.mins-min)/span)}%`; d.innerHTML=`<div class="dot"></div><div class="lbl">${p.label}</div><div class="time">${p.time}</div>`; box.appendChild(d); }); }
-function setHero(w){ const days = w[0] || {icon:'☀️',desc:'--',tmax:'--',tmin:'--',rain:'--',wind:'--',rainSym:'▫️',rainBar:0,rainColor:'#94a3b8',rainLabel:'',windSym:'🍃',windBar:0,windColor:'#7dd3fc',windLabel:'',maxCls:'temp-cold',minCls:'temp-cold'}; el('heroIcon').textContent=days.icon; el('heroTitle').textContent=days.desc; el('heroSub').textContent=`${days.tmax} · ${days.tmin}`; el('heroPills').innerHTML=`<span class="pill">${days.rainSym} ${days.rain} ${days.rainLabel}</span><span class="pill">${days.windSym} ${days.wind} ${days.windLabel}</span><span class="pill ${days.maxCls}">${days.tmax}</span><span class="pill ${days.minCls}">${days.tmin}</span>`; const bg = days.desc.includes('Lluvia') || days.desc.includes('Chubascos') ? 'radial-gradient(circle at top,#20324f 0,#07111f 60%)' : days.desc.includes('Nublado') ? 'radial-gradient(circle at top,#1a2c42 0,#07111f 60%)' : 'radial-gradient(circle at top,#233a5c 0,#07111f 60%)'; document.body.style.background=bg; }
-async function load(){
-  el('statusText').textContent='Cargando Open-Meteo e IdeIHM...';
-  try{ const w=await getWeather(); renderWeather(w); localStorage.setItem('weather_cache_pro_v4', JSON.stringify(w)); const maxs=w.map(x=>parseFloat(x.tmax)).filter(Number.isFinite); const mins=w.map(x=>parseFloat(x.tmin)).filter(Number.isFinite); const rain=w.map(x=>parseFloat(x.rain)).filter(Number.isFinite); const wind=w.map(x=>parseFloat(x.wind)).filter(Number.isFinite); const rr=rainLevel(rain.reduce((a,b)=>a+b,0)); const wl=windLevel(Math.max(...wind)); renderMetrics({maxT:maxs.length?Math.max(...maxs).toFixed(0)+'°C':'--', minT:mins.length?Math.min(...mins).toFixed(0)+'°C':'--', rain:`${rain.reduce((a,b)=>a+b,0).toFixed(1)} mm`, wind:`${Math.max(...wind).toFixed(0)} km/h`, rainSym:rr.sym,rainBar:rr.bar,rainColor:rr.color,rainLabel:rr.label,windSym:wl.sym,windBar:wl.bar,windColor:wl.color,windLabel:wl.label, maxCls:maxs.length?tempClass(Math.max(...maxs)):'temp-cold', minCls:mins.length?tempClass(Math.min(...mins)):'temp-cold'}); setHero(w); }catch(e){ if(weatherCache) { const w=JSON.parse(weatherCache); renderWeather(w); setHero(w); } el('weatherErr').style.display='block'; el('weatherErr').textContent='Tiempo cargado desde caché o no disponible.'; }
-  try{ const raw=await loadIdeIhm(); const rows=normalizeIdeIhm(raw); renderTides(rows); el('tideBadge').textContent=raw?.mareas?.puerto||'IdeIHM'; el('tideNote').textContent=`Puerto: ${raw?.mareas?.puerto||'Cádiz'}. Fecha: ${raw?.mareas?.fecha||''}. ${raw?.mareas?.ndatos||rows.length} datos.`; const n=nextTides(rows); el('khigh').textContent = n.high ? `${n.high.hora} · ${n.high.altura} m` : '--'; el('klow').textContent = n.low ? `${n.low.hora} · ${n.low.altura} m` : '--'; el('highDelta').textContent = deltaText(n.high); el('lowDelta').textContent = deltaText(n.low); buildTimeline(n.sorted, n.nowMin); el('statusText').textContent='IdeIHM cargado e interpretado.'; }catch(e){ el('tideErr').style.display='block'; el('tideErr').textContent='No se pudieron cargar datos de IdeIHM.'; el('tideNote').textContent='Sin datos de mareas.'; el('statusText').textContent='Fallo de IdeIHM.'; }
-}
-load();
-</script>
+            <div class="text-right">
+              <span id="pWindName" class="text-xs font-black text-cyan-400 block">--</span>
+              <span id="pWindSpeed" class="text-[10px] font-semibold block opacity-90">-- km/h</span>
+            </div>
+          </div>
+
+          <!-- Beach Comfort Score Badge & Sun Cycle -->
+          <div class="grid grid-cols-2 gap-1">
+            <div class="card-inner rounded-lg p-1.5 flex items-center gap-2">
+              <div class="text-lg">🏖️</div>
+              <div>
+                <span class="text-[8px] font-bold uppercase block opacity-75">Índice Playa</span>
+                <span id="beachScore" class="text-xs font-black text-emerald-400 block leading-tight">9.2 / 10 · Excelente</span>
+              </div>
+            </div>
+
+            <div class="card-inner rounded-lg p-1.5 flex items-center justify-between text-[9px] font-bold">
+              <div class="flex items-center gap-1">
+                <span>🌅</span>
+                <div>
+                  <span class="block text-[8px] opacity-70">Amanecer</span>
+                  <span id="sunRiseTime" class="text-amber-300">--:--</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 text-right">
+                <div>
+                  <span class="block text-[8px] opacity-70">Atardecer</span>
+                  <span id="sunSetTime" class="text-rose-400">--:--</span>
+                </div>
+                <span>🌇</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Weather Specs Grid (2x2) -->
+          <div class="grid grid-cols-2 gap-1.5">
+            <div class="card-inner rounded-xl p-2.5 sm:p-3 text-center flex flex-col justify-center">
+              <span class="text-[10px] font-bold uppercase block opacity-75">Lluvia 💧</span>
+              <span id="pRainProb" class="text-sm sm:text-base font-black text-blue-400 block mt-0.5">--% Prob</span>
+              <span id="pRainSum" class="text-[10px] opacity-75 block mt-0.5">-- mm</span>
+            </div>
+
+            <div class="card-inner rounded-xl p-2.5 sm:p-3 text-center flex flex-col justify-center">
+              <span class="text-[10px] font-bold uppercase block opacity-75">Humedad 💨</span>
+              <span id="pHumidity" class="text-sm sm:text-base font-black block mt-0.5">--%</span>
+              <span class="text-[10px] opacity-75 block mt-0.5">Relativa</span>
+            </div>
+
+            <div class="card-inner rounded-xl p-2.5 sm:p-3 text-center flex flex-col justify-center">
+              <span class="text-[10px] font-bold uppercase block opacity-75">Radiación UV ☀️</span>
+              <span id="pUv" class="text-sm sm:text-base font-black text-amber-400 block mt-0.5">-- / 11</span>
+              <span class="text-[10px] opacity-75 block mt-0.5">Intensidad Sol</span>
+            </div>
+
+            <div class="card-inner rounded-xl p-2.5 sm:p-3 text-center flex flex-col justify-center">
+              <span class="text-[10px] font-bold uppercase block opacity-75">Presión ⏲️</span>
+              <span id="pPressure" class="text-sm sm:text-base font-black text-emerald-400 block mt-0.5">-- hPa</span>
+              <span class="text-[10px] opacity-75 block mt-0.5">Atmosférica</span>
+            </div>
+          </div>
+
+          <!-- 24-HOUR FORECAST (8 Key 3-Hour Steps in 4x2 Grid with Wind & Rain) -->
+          <div>
+            <div class="flex items-center justify-between mb-0.5">
+              <h3 class="text-[10px] font-bold uppercase tracking-wider opacity-90">Pronóstico 24h (Cada 3h)</h3>
+              <span class="text-[9px] text-cyan-400 font-medium">Viento + Temp + Lluvia</span>
+            </div>
+            <!-- Grid 8 items in 4x2 fits cleanly without vertical or horizontal scrollbar -->
+            <div id="hourlyContainer" class="grid grid-cols-4 gap-1">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- COLUMN 2: TIDES & MARINE DATA WITH SMOOTH GRAPH & CURRENT PHASE (5 Cols on lg) -->
+      <div class="lg:col-span-5 glass-panel rounded-xl p-2.5 flex flex-col justify-between overflow-hidden">
+        <div class="flex flex-col h-full justify-between gap-1">
+          
+          <!-- Tide Header -->
+          <div class="flex items-center justify-between pb-1 border-b border-white/10">
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 class="text-xs sm:text-sm font-bold flex items-center gap-1.5 tv-title">
+                  <span>🌊 Mareas de Cádiz</span>
+                </h2>
+                <span id="tidePhaseBadge" class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
+                  ⚡ Marea Creciente
+                </span>
+              </div>
+              <p id="tidePortName" class="text-[10px] opacity-75">Puerto de Cádiz · Oficial</p>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span id="currentTimeBadge" class="bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md">
+                📍 Ahora: --:--
+              </span>
+              <span id="tideCoefBadge" class="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-extrabold px-2 py-0.5 rounded-lg">
+                Coef: 78
+              </span>
+            </div>
+          </div>
+
+          <!-- High / Low Tide Countdowns -->
+          <div class="grid grid-cols-2 gap-1.5">
+            <div class="bg-gradient-to-br from-emerald-950/40 via-slate-900/40 to-transparent border border-emerald-500/30 rounded-xl p-2.5 sm:p-3 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-bold text-emerald-400 uppercase block">Pleamar Próxima</span>
+                <span id="nextHighTime" class="text-lg sm:text-xl font-black block leading-tight mt-0.5">--:--</span>
+                <span id="nextHighHeight" class="text-emerald-400 text-xs font-bold block mt-0.5">-- m</span>
+              </div>
+              <span id="nextHighCountdown" class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2 py-1 rounded-full">
+                en --h
+              </span>
+            </div>
+
+            <div class="bg-gradient-to-br from-amber-950/40 via-slate-900/40 to-transparent border border-amber-500/30 rounded-xl p-2.5 sm:p-3 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-bold text-amber-400 uppercase block">Bajamar Próxima</span>
+                <span id="nextLowTime" class="text-lg sm:text-xl font-black block leading-tight mt-0.5">--:--</span>
+                <span id="nextLowHeight" class="text-amber-400 text-xs font-bold block mt-0.5">-- m</span>
+              </div>
+              <span id="nextLowCountdown" class="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold px-2 py-1 rounded-full">
+                en --h
+              </span>
+            </div>
+          </div>
+
+          <!-- Daily Tide Events List -->
+          <div>
+            <span class="text-[9px] font-bold uppercase block mb-0.5 opacity-75">Horario Mareas del Día</span>
+            <div id="tideList" class="grid grid-cols-2 sm:grid-cols-4 gap-1">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+
+          <!-- Tide SVG Curve Chart with SLEEK GRADIENT & CURRENT TIME INDICATOR -->
+          <div class="card-inner rounded-xl p-2 relative overflow-hidden flex-1 min-h-[120px] flex items-center">
+            <svg id="tideSvg" viewBox="0 0 600 120" class="w-full h-full overflow-visible">
+              <!-- Rendered dynamically -->
+            </svg>
+          </div>
+
+          <!-- Marine Conditions Pill Bar -->
+          <div class="grid grid-cols-2 gap-1.5">
+            <div class="card-inner rounded-xl p-2.5 sm:p-3 text-center flex flex-col justify-center">
+              <span class="text-[10px] font-bold uppercase block opacity-75">Oleaje Playa 🏄</span>
+              <span id="marineWaveH" class="text-sm sm:text-base font-black block mt-0.5">-- m</span>
+              <span id="marineWaveP" class="text-[10px] text-blue-400 font-bold block mt-0.5">Período --s</span>
+            </div>
+
+            <div class="card-inner rounded-xl p-2.5 sm:p-3 text-center flex flex-col justify-center">
+              <span class="text-[10px] font-bold uppercase block opacity-75">Temp. Agua 🌡️</span>
+              <span id="marineSeaT" class="text-sm sm:text-base font-black text-cyan-400 block mt-0.5">--°C</span>
+              <span class="text-[10px] opacity-75 font-medium block mt-0.5">Atlántico Cádiz</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- COLUMN 3: WEBCAM DIRECT & RADICALLY DETAILED 7-DAY FORECAST (3 Cols on lg) -->
+      <div class="lg:col-span-3 glass-panel-glow rounded-xl p-2.5 flex flex-col justify-between overflow-hidden">
+        <div class="flex flex-col h-full justify-between gap-1">
+          
+          <!-- Direct Webcam Header -->
+          <div class="flex items-center justify-between pb-1 border-b border-white/10">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-red-500 live-pulse"></span>
+              <h2 class="text-xs font-bold tv-title">Webcam Directo</h2>
+            </div>
+            <span class="text-[9px] font-bold text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 px-2 py-0.5 rounded-full">
+              SkylineWebcams 📹
+            </span>
+          </div>
+
+          <!-- Direct SkylineWebcams Multi-Cam Card -->
+          <div class="rounded-lg card-inner p-2 flex flex-col gap-1.5 relative overflow-hidden bg-gradient-to-b from-slate-900/90 to-slate-950/95 border border-cyan-500/30">
+            <div class="flex items-center justify-between w-full px-0.5">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-red-500 live-pulse"></span>
+                <span class="text-[9px] font-black uppercase tracking-wider text-rose-300">WEBCAMS HD EN DIRECTO</span>
+              </div>
+              <span class="text-[9px] text-cyan-300 font-semibold opacity-90">5 Cámaras</span>
+            </div>
+
+            <!-- List of 5 Webcams with Direct HD Links -->
+            <div class="grid grid-cols-1 gap-1">
+              <!-- 1. Santa María del Mar -->
+              <a
+                href="https://www.skylinewebcams.com/es/webcam/espana/andalucia/cadiz/playa-santa-maria-del-mar.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="w-full bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-400 text-white font-black text-[10px] sm:text-xs py-1 px-2 rounded-lg shadow-md border border-rose-300/40 flex items-center justify-between transition-all hover:scale-[1.01] active:scale-[0.99]"
+                data-tv-focusable="true"
+              >
+                <span class="flex items-center gap-1 truncate">
+                  <span>▶</span>
+                  <span class="truncate">Sta. María del Mar</span>
+                </span>
+                <span class="text-[9px] bg-black/30 px-1.5 py-0.2 rounded border border-white/20 shrink-0">Cádiz ↗</span>
+              </a>
+
+              <!-- 2. Playa Victoria -->
+              <a
+                href="https://www.skylinewebcams.com/es/webcam/espana/andalucia/cadiz/playa-victoria.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="w-full card-inner hover:bg-slate-800/90 text-slate-100 font-bold text-[10px] py-1 px-2 rounded-lg border border-white/10 flex items-center justify-between transition-colors"
+                data-tv-focusable="true"
+              >
+                <span class="flex items-center gap-1 truncate">
+                  <span class="text-rose-400">📹</span>
+                  <span class="truncate">Playa Victoria</span>
+                </span>
+                <span class="text-[9px] text-cyan-300 font-semibold shrink-0">Cádiz ↗</span>
+              </a>
+
+              <!-- 3. Playa de la Barrosa (Chiclana) -->
+              <a
+                href="https://www.skylinewebcams.com/es/webcam/espana/andalucia/cadiz/chiclana-de-la-frontera-playa-de-la-barrosa.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="w-full card-inner hover:bg-slate-800/90 text-slate-100 font-bold text-[10px] py-1 px-2 rounded-lg border border-white/10 flex items-center justify-between transition-colors"
+                data-tv-focusable="true"
+              >
+                <span class="flex items-center gap-1 truncate">
+                  <span class="text-rose-400">📹</span>
+                  <span class="truncate">Playa de la Barrosa</span>
+                </span>
+                <span class="text-[9px] text-cyan-300 font-semibold shrink-0">Chiclana ↗</span>
+              </a>
+
+              <!-- 4. Playa de Sancti Petri -->
+              <a
+                href="https://www.skylinewebcams.com/es/webcam/espana/andalucia/cadiz/playa-de-sancti-petri.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="w-full card-inner hover:bg-slate-800/90 text-slate-100 font-bold text-[10px] py-1 px-2 rounded-lg border border-white/10 flex items-center justify-between transition-colors"
+                data-tv-focusable="true"
+              >
+                <span class="flex items-center gap-1 truncate">
+                  <span class="text-rose-400">📹</span>
+                  <span class="truncate">Playa de Sancti Petri</span>
+                </span>
+                <span class="text-[9px] text-cyan-300 font-semibold shrink-0">Chiclana ↗</span>
+              </a>
+
+              <!-- 5. Barbate - Playa del Carmen -->
+              <a
+                href="https://www.skylinewebcams.com/es/webcam/espana/andalucia/cadiz/barbate-playa-del-carmen.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="w-full card-inner hover:bg-slate-800/90 text-slate-100 font-bold text-[10px] py-1 px-2 rounded-lg border border-white/10 flex items-center justify-between transition-colors"
+                data-tv-focusable="true"
+              >
+                <span class="flex items-center gap-1 truncate">
+                  <span class="text-rose-400">📹</span>
+                  <span class="truncate">Playa del Carmen</span>
+                </span>
+                <span class="text-[9px] text-cyan-300 font-semibold shrink-0">Barbate ↗</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Beach Advice Box -->
+          <div id="beachAdviceBox" class="card-inner rounded-lg p-1.5">
+            <div class="flex items-center justify-between mb-0.5">
+              <h4 id="beachAdviceTitle" class="text-[10px] font-bold text-cyan-400">Viento de Poniente 🌊</h4>
+              <span id="beachAdviceTag" class="text-[8px] font-black px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">IDEAL BAÑO</span>
+            </div>
+            <p id="beachAdviceText" class="text-[9px] opacity-85 leading-tight">
+              Viento fresco de mar. Ideal para pasar el día en la playa y practicar surf o baño en Santa María del Mar.
+            </p>
+          </div>
+
+          <!-- 7-DAY ENHANCED FORECAST SECTION -->
+          <div class="flex-1 min-h-0 flex flex-col justify-end">
+            <div class="flex items-center justify-between mb-0.5">
+              <h3 class="text-[10px] font-bold uppercase tracking-wider opacity-90">Pronóstico Detallado 7 Días</h3>
+              <span class="text-[8px] opacity-75">Cádiz</span>
+            </div>
+            <!-- Grid 7 rows with complete weather metrics -->
+            <div id="forecast7Days" class="grid grid-cols-1 gap-1">
+              <!-- Injected via JS -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER (Compact bottom line) -->
+    <footer class="text-center text-[9px] opacity-70 font-medium py-0.5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-1 shrink-0">
+      <div>Cádiz Meteo & Mareas PWA · Playa Santa María del Mar</div>
+      <div>Sin scroll · Formato 100% Pantalla TV (1080p / 4K)</div>
+      <div>Datos: Open-Meteo, IdeIHM y SkylineWebcams</div>
+    </footer>
+  </div>
+
+  <!-- SINGLE SELF-CONTAINED JAVASCRIPT LOGIC -->
+  <script>
+    const CADIZ_LAT = 36.5271;
+    const CADIZ_LON = -6.2886;
+    const CACHE_KEY = 'cadiz_meteo_no_scroll_v8';
+
+    let state = {
+      isTvMode: false,
+      deferredPrompt: null,
+      weather: null,
+      tides: null,
+      marine: null,
+      theme: 'ocean'
+    };
+
+    // Radical Theme Switcher Logic
+    function changeTheme(themeName) {
+      state.theme = themeName;
+      const root = document.getElementById('htmlRoot');
+      root.className = `min-h-screen lg:h-screen lg:overflow-hidden theme-${themeName}`;
+      localStorage.setItem('cadiz_meteo_theme', themeName);
+      if (state.weather) renderUI();
+    }
+
+    // Load Saved Theme
+    const savedTheme = localStorage.getItem('cadiz_meteo_theme');
+    if (savedTheme) {
+      state.theme = savedTheme;
+      document.getElementById('htmlRoot').className = `min-h-screen lg:h-screen lg:overflow-hidden theme-${savedTheme}`;
+      document.getElementById('themeSelect').value = savedTheme;
+    }
+
+    // Clock Logic
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const clockElem = document.getElementById('clockTime');
+      if (clockElem) clockElem.textContent = timeStr;
+      
+      const dateElem = document.getElementById('clockDate');
+      if (dateElem) dateElem.textContent = now.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+
+      const badgeElem = document.getElementById('currentTimeBadge');
+      if (badgeElem) badgeElem.textContent = `📍 Ahora: ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+      
+      // Re-render tide SVG curve every minute so the sleek indicator stays exact
+      if (state.tides) {
+        renderTideSvg(state.tides);
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Toggle Smart TV Mode
+    function toggleTvMode() {
+      state.isTvMode = !state.isTvMode;
+      const app = document.getElementById('app');
+      const label = document.getElementById('tvModeLabel');
+      
+      if (state.isTvMode) {
+        app.classList.add('tv-mode-active');
+        if (label) label.textContent = 'Modo TV Activo';
+      } else {
+        app.classList.remove('tv-mode-active');
+        if (label) label.textContent = 'Modo TV';
+      }
+    }
+
+    // Wind Direction Helper (Cardinal + Name)
+    function getWindDirectionText(deg) {
+      const norm = (deg % 360 + 360) % 360;
+      if (norm >= 45 && norm <= 135) return { text: 'Levante (E)', arrow: '➡️', short: 'E / Lev' };
+      if (norm >= 225 && norm <= 315) return { text: 'Poniente (W)', arrow: '⬅️', short: 'W / Pon' };
+      if (norm > 135 && norm < 225) return { text: 'Sur (S)', arrow: '⬆️', short: 'S / Sur' };
+      return { text: 'Norte (N)', arrow: '⬇️', short: 'N / Nor' };
+    }
+
+    // Wind Name Calculation for Cádiz
+    function getCadizWindInfo(deg) {
+      const norm = (deg % 360 + 360) % 360;
+      if (norm >= 45 && norm <= 135) return { name: 'Levante 🚩', isLevante: true };
+      if (norm >= 225 && norm <= 315) return { name: 'Poniente 🌊', isPoniente: true };
+      if (norm > 135 && norm < 225) return { name: 'Sur (Vendaval) 🌧️' };
+      return { name: 'Norte (Frescor) 🍃' };
+    }
+
+    // Weather Codes Emoji & Description
+    function getWeatherInfo(code) {
+      const map = {
+        0: { icon: '☀️', desc: 'Despejado' },
+        1: { icon: '🌤️', desc: 'Casi despejado' },
+        2: { icon: '⛅', desc: 'Parcialmente nublado' },
+        3: { icon: '☁️', desc: 'Nublado' },
+        45: { icon: '🌫️', desc: 'Niebla' },
+        51: { icon: '🌦️', desc: 'Llovizna' },
+        61: { icon: '🌧️', desc: 'Lluvia' },
+        80: { icon: '🌦️', desc: 'Chubascos' },
+        95: { icon: '⛈️', desc: 'Tormenta' }
+      };
+      return map[code] || { icon: '🌤️', desc: 'Nubosidad variable' };
+    }
+
+    // Harmonic Tide Fallback Calculation for Cádiz
+    function calculateHarmonicTides() {
+      const now = new Date();
+      const startOfDay = new Date(now);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const refEpoch = new Date('2026-01-01T04:30:00Z').getTime();
+      const halfPeriodMs = (12.4206 * 3600 * 1000) / 2;
+      const events = [];
+      const dayStartMs = startOfDay.getTime();
+
+      let currentCycle = Math.floor((dayStartMs - refEpoch) / halfPeriodMs) - 1;
+
+      for (let i = 0; i < 6; i++) {
+        const cycleTime = refEpoch + (currentCycle + i) * halfPeriodMs;
+        const isHigh = (currentCycle + i) % 2 === 0;
+        const dateObj = new Date(cycleTime);
+        const hoursStr = String(dateObj.getHours()).padStart(2, '0');
+        const minsStr = String(dateObj.getMinutes()).padStart(2, '0');
+        const height = isHigh ? 3.08 : 0.62;
+
+        events.push({
+          hora: `${hoursStr}:${minsStr}`,
+          tipo: isHigh ? 'Pleamar' : 'Bajamar',
+          altura: height,
+          timestamp: cycleTime
+        });
+      }
+
+      return processTides(events, 'Puerto de Cádiz (Mareas Armónicas)');
+    }
+
+    function processTides(events, portName) {
+      const nowMs = Date.now();
+      const sorted = [...events].sort((a, b) => a.timestamp - b.timestamp);
+
+      let prev = null, next = null;
+      for (let e of sorted) {
+        if (e.timestamp <= nowMs) prev = e;
+        else { next = e; break; }
+      }
+
+      const nextHigh = sorted.find(e => e.timestamp > nowMs && e.tipo.toLowerCase().includes('pleamar')) || null;
+      const nextLow = sorted.find(e => e.timestamp > nowMs && e.tipo.toLowerCase().includes('bajamar')) || null;
+
+      let currentLevel = 1.85;
+      let isRising = true;
+
+      if (prev && next) {
+        const progress = Math.min(Math.max((nowMs - prev.timestamp) / (next.timestamp - prev.timestamp), 0), 1);
+        const cosFactor = (1 - Math.cos(progress * Math.PI)) / 2;
+        currentLevel = prev.altura + (next.altura - prev.altura) * cosFactor;
+        isRising = next.altura > prev.altura;
+      }
+
+      // Compute Tide Coefficient & Level (ALTO, MEDIO, BAJO)
+      let maxH = 3.1, minH = 0.6;
+      if (sorted.length > 0) {
+        const heights = sorted.map(e => e.altura);
+        maxH = Math.max(...heights);
+        minH = Math.min(...heights);
+      }
+      const amp = Math.max(maxH - minH, 0.5);
+      let coef = Math.round((amp / 3.2) * 100);
+      coef = Math.max(25, Math.min(115, coef));
+
+      let coefCategory = "MEDIO ⚖️";
+      let coefClass = "bg-amber-500/20 text-amber-300 border-amber-500/40";
+      if (coef >= 70) {
+        coefCategory = "ALTO 🌊";
+        coefClass = "bg-rose-500/20 text-rose-300 border-rose-500/40";
+      } else if (coef < 50) {
+        coefCategory = "BAJO ⚓";
+        coefClass = "bg-slate-500/20 text-slate-300 border-slate-500/40";
+      }
+
+      return {
+        portName,
+        events: sorted,
+        currentLevel: Number(currentLevel.toFixed(2)),
+        isRising,
+        nextHigh,
+        nextLow,
+        coef,
+        coefCategory,
+        coefClass
+      };
+    }
+
+    function generateFallbackWeather() {
+      const now = new Date();
+      const hourlyTime = [];
+      const hourlyTemp = [];
+      const hourlyRainP = [];
+      const hourlyWeatherCode = [];
+      const hourlyWindSpeed = [];
+      const hourlyWindDir = [];
+
+      for (let i = 0; i < 24; i++) {
+        const d = new Date(now.getTime() + i * 3600 * 1000);
+        hourlyTime.push(d.toISOString());
+        hourlyTemp.push(20 + Math.round(Math.sin((i - 6) / 24 * Math.PI * 2) * 4));
+        hourlyRainP.push(i % 6 === 0 ? 10 : 0);
+        hourlyWeatherCode.push(1);
+        hourlyWindSpeed.push(16 + (i % 5));
+        hourlyWindDir.push(270);
+      }
+
+      const dailyTime = [];
+      const dailyMax = [];
+      const dailyMin = [];
+      const dailyCode = [];
+      const dailyWindSpeedMax = [];
+      const dailyWindGustsMax = [];
+      const dailyWindDir = [];
+      const dailyRainSum = [];
+      const dailyRainProb = [];
+      const dailyUv = [];
+      const dailySunrise = [];
+      const dailySunset = [];
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(now.getTime() + i * 86400 * 1000);
+        const dateStr = d.toISOString().split('T')[0];
+        dailyTime.push(dateStr);
+        dailyMax.push(24 + (i % 3));
+        dailyMin.push(18 - (i % 2));
+        dailyCode.push(i === 2 ? 2 : 0);
+        dailyWindSpeedMax.push(18 + i);
+        dailyWindGustsMax.push(28 + i * 2);
+        dailyWindDir.push(270);
+        dailyRainSum.push(i === 2 ? 0.4 : 0);
+        dailyRainProb.push(i === 2 ? 20 : 5);
+        dailyUv.push(8);
+
+        const sr = new Date(d); sr.setHours(7, 15, 0, 0);
+        const ss = new Date(d); ss.setHours(21, 30, 0, 0);
+        dailySunrise.push(sr.toISOString());
+        dailySunset.push(ss.toISOString());
+      }
+
+      return {
+        current: {
+          temperature_2m: 23,
+          apparent_temperature: 24,
+          relative_humidity_2m: 68,
+          precipitation: 0,
+          weather_code: 1,
+          surface_pressure: 1016,
+          wind_speed_10m: 18,
+          wind_direction_10m: 270
+        },
+        hourly: {
+          time: hourlyTime,
+          temperature_2m: hourlyTemp,
+          precipitation_probability: hourlyRainP,
+          weather_code: hourlyWeatherCode,
+          wind_speed_10m: hourlyWindSpeed,
+          wind_direction_10m: hourlyWindDir
+        },
+        daily: {
+          time: dailyTime,
+          temperature_2m_max: dailyMax,
+          temperature_2m_min: dailyMin,
+          weather_code: dailyCode,
+          wind_speed_10m_max: dailyWindSpeedMax,
+          wind_gusts_10m_max: dailyWindGustsMax,
+          wind_direction_10m_dominant: dailyWindDir,
+          precipitation_sum: dailyRainSum,
+          precipitation_probability_max: dailyRainProb,
+          uv_index_max: dailyUv,
+          sunrise: dailySunrise,
+          sunset: dailySunset
+        }
+      };
+    }
+
+    function generateFallbackMarine() {
+      return {
+        hourly: {
+          wave_height: [0.8, 0.9, 0.8, 0.7, 0.8],
+          wave_period: [7, 7, 8, 7, 7]
+        }
+      };
+    }
+
+    // Main API Load Function
+    async function loadAllData() {
+      try {
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${CADIZ_LAT}&longitude=${CADIZ_LON}&timezone=Europe%2FMadrid&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,uv_index_max,sunrise,sunset&forecast_days=7`;
+        const marineUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${CADIZ_LAT}&longitude=${CADIZ_LON}&timezone=Europe%2FMadrid&hourly=wave_height,wave_period`;
+
+        const [wRes, mRes] = await Promise.allSettled([
+          fetch(weatherUrl, { mode: 'cors' }),
+          fetch(marineUrl, { mode: 'cors' })
+        ]);
+
+        let wData = null, mData = null;
+        if (wRes.status === 'fulfilled' && wRes.value.ok) wData = await wRes.value.json();
+        if (mRes.status === 'fulfilled' && mRes.value.ok) mData = await mRes.value.json();
+
+        if (wData) {
+          state.weather = wData;
+          state.marine = mData || generateFallbackMarine();
+        } else {
+          const cached = localStorage.getItem(CACHE_KEY);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            state.weather = parsed.weather || generateFallbackWeather();
+            state.marine = parsed.marine || generateFallbackMarine();
+          } else {
+            state.weather = generateFallbackWeather();
+            state.marine = generateFallbackMarine();
+          }
+        }
+
+        // IdeIHM Tides Fetch
+        try {
+          const tideRes = await fetch('https://ideihm.covam.es/api-ihm/getmarea?request=gettide&id=42&format=json', { mode: 'cors' });
+          if (tideRes.ok) {
+            const rawTide = await tideRes.json();
+            const rawEvents = rawTide?.mareas?.datos?.marea || [];
+            if (rawEvents.length > 0) {
+              const parsed = rawEvents.map(x => {
+                const parts = x.hora.split(':');
+                const d = new Date();
+                d.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
+                return { hora: x.hora, tipo: x.tipo.charAt(0).toUpperCase() + x.tipo.slice(1), altura: parseFloat(x.altura), timestamp: d.getTime() };
+              });
+              state.tides = processTides(parsed, rawTide?.mareas?.puerto || 'Puerto de Cádiz');
+            }
+          }
+        } catch (e) {}
+
+        if (!state.tides) {
+          state.tides = calculateHarmonicTides();
+        }
+
+        localStorage.setItem(CACHE_KEY, JSON.stringify(state));
+        renderUI();
+      } catch (err) {
+        console.warn("Using fallback data due to network error:", err);
+        if (!state.weather) state.weather = generateFallbackWeather();
+        if (!state.marine) state.marine = generateFallbackMarine();
+        if (!state.tides) state.tides = calculateHarmonicTides();
+        renderUI();
+      }
+    }
+
+    // Render smooth gradient tide wave SVG
+    function renderTideSvg(t) {
+      const svg = document.getElementById('tideSvg');
+      if (!svg || !t || !t.events || t.events.length === 0) return;
+
+      const now = new Date();
+      const startOfDay = new Date(now);
+      startOfDay.setHours(0, 0, 0, 0);
+      const dayStartMs = startOfDay.getTime();
+      const dayEndMs = dayStartMs + 24 * 3600 * 1000;
+      const nowMs = now.getTime();
+
+      // SVG Canvas bounds
+      const width = 600;
+      const height = 120;
+      const padX = 35;
+      const padY = 22;
+      const drawW = width - padX * 2;
+      const drawH = height - padY * 2;
+
+      // Heights bounds (0.5m to 3.2m)
+      const minH = 0.4;
+      const maxH = 3.3;
+
+      function getX(ts) {
+        const pct = (ts - dayStartMs) / (24 * 3600 * 1000);
+        return padX + Math.max(0, Math.min(1, pct)) * drawW;
+      }
+
+      function getY(h) {
+        const pct = (h - minH) / (maxH - minH);
+        return padY + (1 - pct) * drawH;
+      }
+
+      // Filter events for today (plus boundary padding)
+      const todayEvents = t.events.filter(e => e.timestamp >= dayStartMs - 3 * 3600 * 1000 && e.timestamp <= dayEndMs + 3 * 3600 * 1000);
+      todayEvents.sort((a, b) => a.timestamp - b.timestamp);
+
+      if (todayEvents.length < 2) return;
+
+      // Generate points
+      const points = todayEvents.map(e => ({
+        x: getX(e.timestamp),
+        y: getY(e.altura),
+        type: e.tipo,
+        hora: e.hora,
+        altura: e.altura,
+        ts: e.timestamp
+      }));
+
+      // Build smooth cubic bezier curve
+      let pathD = `M ${points[0].x} ${points[0].y}`;
+      for (let i = 0; i < points.length - 1; i++) {
+        const p0 = points[i];
+        const p1 = points[i + 1];
+        const cpX1 = p0.x + (p1.x - p0.x) * 0.5;
+        const cpY1 = p0.y;
+        const cpX2 = p0.x + (p1.x - p0.x) * 0.5;
+        const cpY2 = p1.y;
+        pathD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
+      }
+
+      // Area fill path
+      const lastP = points[points.length - 1];
+      const areaD = `${pathD} L ${lastP.x} ${height - 5} L ${points[0].x} ${height - 5} Z`;
+
+      // Current time X and level Y
+      const nowX = getX(nowMs);
+      const curY = getY(t.currentLevel);
+
+      // Grid lines
+      const gridLevels = [1.0, 2.0, 3.0];
+      const gridLinesSvg = gridLevels.map(lvl => {
+        const yLvl = getY(lvl);
+        return `
+          <line x1="${padX}" y1="${yLvl}" x2="${width - padX}" y2="${yLvl}" stroke="currentColor" stroke-opacity="0.12" stroke-dasharray="3,3" />
+          <text x="${padX - 4}" y="${yLvl + 3}" fill="currentColor" fill-opacity="0.45" font-size="8" text-anchor="end" font-weight="bold">${lvl}m</text>
+        `;
+      }).join('');
+
+      // Peak dots and text labels
+      const dotsSvg = points.map(p => {
+        if (p.x < padX - 10 || p.x > width - padX + 10) return '';
+        const isHigh = p.type.toLowerCase().includes('pleamar');
+        const colorClass = isHigh ? '#34d399' : '#f59e0b';
+        const labelY = isHigh ? p.y - 8 : p.y + 14;
+
+        return `
+          <circle cx="${p.x}" cy="${p.y}" r="4" fill="${colorClass}" stroke="#0b1322" stroke-width="2" />
+          <text x="${p.x}" y="${labelY}" fill="currentColor" font-size="8" text-anchor="middle" font-weight="900" opacity="0.95">${p.hora} (${p.altura}m)</text>
+        `;
+      }).join('');
+
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="tideGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--svg-curve)" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="var(--svg-curve)" stop-opacity="0.02" />
+          </linearGradient>
+        </defs>
+
+        <!-- Horizontal Grid Lines -->
+        ${gridLinesSvg}
+
+        <!-- Gradient Area Under Curve -->
+        <path d="${areaD}" fill="url(#tideGrad)" />
+
+        <!-- Smooth Tidal Sine Wave Line -->
+        <path d="${pathD}" fill="none" stroke="var(--svg-curve)" stroke-width="3" stroke-linecap="round" />
+
+        <!-- Tide Peak Dots & Time Labels -->
+        ${dotsSvg}
+
+        <!-- Current Water Height Level Horizontal Guide Line -->
+        <line x1="${padX}" y1="${curY}" x2="${width - padX}" y2="${curY}" stroke="var(--accent-color)" stroke-opacity="0.25" stroke-dasharray="2,2" />
+
+        <!-- Vertical Current Time Line -->
+        <line x1="${nowX}" y1="12" x2="${nowX}" y2="${height - 5}" stroke="#f43f5e" stroke-width="1.5" stroke-dasharray="3,2" />
+
+        <!-- Clean Water Point on Curve at Current Time (No pulsing outer ring) -->
+        <circle cx="${nowX}" cy="${curY}" r="4" fill="#f43f5e" stroke="#ffffff" stroke-width="1.5" />
+
+        <!-- Clean exact water height label at top, completely non-blocking -->
+        <text x="${Math.min(Math.max(nowX, padX + 25), width - padX - 25)}" y="10" fill="#f43f5e" font-size="8" font-weight="900" text-anchor="middle">📍 Ahora: ${t.currentLevel}m</text>
+      `;
+    }
+
+    // UI Rendering
+    function renderUI() {
+      const w = state.weather;
+      const t = state.tides;
+      const m = state.marine;
+
+      if (!w || !w.current) return;
+
+      const curr = w.current;
+      const windInfo = getCadizWindInfo(curr.wind_direction_10m || 270);
+      const wInfo = getWeatherInfo(curr.weather_code || 0);
+
+      // Hero
+      document.getElementById('heroIcon').textContent = wInfo.icon;
+      document.getElementById('heroTemp').textContent = `${Math.round(curr.temperature_2m)}°C`;
+      document.getElementById('heroApparent').textContent = `Sens. ${Math.round(curr.apparent_temperature)}°C`;
+      document.getElementById('heroDesc').textContent = wInfo.desc;
+      document.getElementById('pWindName').textContent = windInfo.name;
+      document.getElementById('pWindSpeed').textContent = `${Math.round(curr.wind_speed_10m)} km/h`;
+      document.getElementById('pRainProb').textContent = `${w.hourly?.precipitation_probability?.[0] || 0}% Prob`;
+      document.getElementById('pRainSum').textContent = `${curr.precipitation || 0} mm`;
+      document.getElementById('pHumidity').textContent = `${Math.round(curr.relative_humidity_2m)}%`;
+      document.getElementById('pUv').textContent = `${w.daily?.uv_index_max?.[0] || 7} / 11`;
+      document.getElementById('pPressure').textContent = `${Math.round(curr.surface_pressure)} hPa`;
+
+      // Sunrise & Sunset Parsing
+      const srStr = w.daily?.sunrise?.[0];
+      const ssStr = w.daily?.sunset?.[0];
+      if (srStr) {
+        const srDate = new Date(srStr);
+        document.getElementById('sunRiseTime').textContent = srDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      }
+      if (ssStr) {
+        const ssDate = new Date(ssStr);
+        document.getElementById('sunSetTime').textContent = ssDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      }
+
+      // Beach Rating Calculation
+      const temp = curr.temperature_2m || 22;
+      const windSpd = curr.wind_speed_10m || 15;
+      const rainP = w.hourly?.precipitation_probability?.[0] || 0;
+      let score = 9.5;
+      if (rainP > 30) score -= 2.5;
+      if (windSpd > 30) score -= 2.0;
+      if (temp < 18) score -= 1.5;
+      score = Math.max(Math.min(score, 10), 5).toFixed(1);
+      const scoreLabel = score >= 8.5 ? 'Excelente' : score >= 7.0 ? 'Buena' : 'Moderada';
+      document.getElementById('beachScore').textContent = `${score} / 10 · ${scoreLabel}`;
+
+      // Quick Metrics Bar (6 Cards)
+      const qBox = document.getElementById('quickMetrics');
+      qBox.innerHTML = `
+        <div class="glass-panel p-1.5 rounded-xl flex items-center gap-2 transition-transform hover:scale-[1.01]">
+          <div class="text-xl sm:text-2xl">🌡️</div>
+          <div>
+            <span class="text-[9px] font-bold uppercase block leading-none opacity-75">Temperatura</span>
+            <span class="text-xs sm:text-sm font-black mt-0.5 block">${Math.round(curr.temperature_2m)}°C</span>
+          </div>
+        </div>
+        <div class="glass-panel p-1.5 rounded-xl flex items-center gap-2 transition-transform hover:scale-[1.01]">
+          <div class="text-xl sm:text-2xl">💨</div>
+          <div>
+            <span class="text-[9px] font-bold uppercase block leading-none opacity-75">Viento Cádiz</span>
+            <span class="text-[11px] font-bold text-cyan-400 block mt-0.5">${windInfo.name}</span>
+            <span class="text-[9px] font-semibold opacity-90">${Math.round(curr.wind_speed_10m)} km/h</span>
+          </div>
+        </div>
+        <div class="glass-panel p-1.5 rounded-xl flex items-center gap-2 transition-transform hover:scale-[1.01]">
+          <div class="text-xl sm:text-2xl">🌊</div>
+          <div>
+            <span class="text-[9px] font-bold uppercase block leading-none opacity-75">Nivel Marea</span>
+            <span class="text-xs sm:text-sm font-black mt-0.5 block">${t ? t.currentLevel : 1.85} m</span>
+          </div>
+        </div>
+        <div class="glass-panel p-1.5 rounded-xl flex items-center gap-2 transition-transform hover:scale-[1.01]">
+          <div class="text-xl sm:text-2xl">🏄</div>
+          <div>
+            <span class="text-[9px] font-bold uppercase block leading-none opacity-75">Oleaje Playa</span>
+            <span class="text-xs sm:text-sm font-black mt-0.5 block">${m?.hourly?.wave_height?.[0] || 0.8} m</span>
+          </div>
+        </div>
+        <div class="glass-panel p-1.5 rounded-xl flex items-center gap-2 transition-transform hover:scale-[1.01]">
+          <div class="text-xl sm:text-2xl">☀️</div>
+          <div>
+            <span class="text-[9px] font-bold uppercase block leading-none opacity-75">Índice UV</span>
+            <span class="text-xs sm:text-sm font-black text-amber-400 mt-0.5 block">${w.daily?.uv_index_max?.[0] || 7} / 11</span>
+          </div>
+        </div>
+        <div class="glass-panel p-1.5 rounded-xl flex items-center gap-2 transition-transform hover:scale-[1.01]">
+          <div class="text-xl sm:text-2xl">⏲️</div>
+          <div>
+            <span class="text-[9px] font-bold uppercase block leading-none opacity-75">Presión Atm.</span>
+            <span class="text-xs font-bold mt-0.5 block">${Math.round(curr.surface_pressure)} hPa</span>
+          </div>
+        </div>
+      `;
+
+      // 24-Hour Forecast in 8 3-Hour Steps with Highlighted Max & Min Temps
+      const hBox = document.getElementById('hourlyContainer');
+      const allTimes = w.hourly?.time || [];
+      const keyIndices = [0, 3, 6, 9, 12, 15, 18, 21];
+      
+      const hourlyTemps = keyIndices.map(idx => Math.round(w.hourly?.temperature_2m?.[idx] ?? 20));
+      const max24h = Math.max(...hourlyTemps);
+      const min24h = Math.min(...hourlyTemps);
+
+      hBox.innerHTML = keyIndices.map((idx, i) => {
+        const tStr = allTimes[idx];
+        if (!tStr) return '';
+        const time = new Date(tStr).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        const temp = hourlyTemps[i];
+        const rainP = w.hourly?.precipitation_probability?.[idx] || 0;
+        const code = w.hourly?.weather_code?.[idx] || 0;
+        const icon = getWeatherInfo(code).icon;
+        
+        const hWindSpd = Math.round(w.hourly?.wind_speed_10m?.[idx] || 12);
+        const hWindDeg = w.hourly?.wind_direction_10m?.[idx] || 270;
+        const hWindDir = getWindDirectionText(hWindDeg);
+
+        const isMax = temp === max24h;
+        const isMin = temp === min24h && !isMax;
+
+        let cardStyle = 'card-inner rounded-xl p-1.5 sm:p-2 text-center flex flex-col items-center justify-between shadow-sm';
+        let tempStyle = 'text-xs sm:text-sm font-black';
+        let badgeTag = '';
+
+        if (isMax) {
+          cardStyle = 'card-inner rounded-xl p-1.5 sm:p-2 text-center flex flex-col items-center justify-between shadow-md border-amber-500/80 bg-amber-500/10 ring-1 ring-amber-400/50';
+          tempStyle = 'text-xs sm:text-sm font-black text-amber-300';
+          badgeTag = '<span class="text-[8px] font-black uppercase text-amber-300 bg-amber-500/30 px-1 py-0.2 rounded border border-amber-400/40">MÁX</span>';
+        } else if (isMin) {
+          cardStyle = 'card-inner rounded-xl p-1.5 sm:p-2 text-center flex flex-col items-center justify-between shadow-md border-sky-500/80 bg-sky-500/10 ring-1 ring-sky-400/50';
+          tempStyle = 'text-xs sm:text-sm font-black text-sky-300';
+          badgeTag = '<span class="text-[8px] font-black uppercase text-sky-300 bg-sky-500/30 px-1 py-0.2 rounded border border-sky-400/40">MÍN</span>';
+        }
+        
+        return `
+          <div class="${cardStyle}">
+            <div class="flex items-center justify-between w-full px-0.5">
+              <span class="text-[10px] font-bold opacity-80">${time}</span>
+              ${badgeTag}
+            </div>
+            <span class="text-lg my-0.5 leading-none">${icon}</span>
+            <span class="${tempStyle}">${temp}°C</span>
+            <span class="text-[9px] text-cyan-400 font-bold mt-0.5">${hWindDir.arrow} ${hWindSpd}k</span>
+            <span class="text-[9px] text-blue-400 font-semibold">💧${rainP}%</span>
+          </div>
+        `;
+      }).join('');
+
+      // Tide Details & Phase
+      if (t) {
+        document.getElementById('tidePortName').textContent = t.portName;
+
+        // Tide Phase Badge
+        const phaseBadge = document.getElementById('tidePhaseBadge');
+        if (phaseBadge) {
+          if (t.isRising) {
+            phaseBadge.className = 'text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/40';
+            phaseBadge.textContent = '⚡ Marea Creciente (Llenando)';
+          } else {
+            phaseBadge.className = 'text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40';
+            phaseBadge.textContent = '⚓ Marea Menguante (Vaciando)';
+          }
+        }
+
+        // Update Tide Coefficient Badge with ALTO, MEDIO, or BAJO label
+        const coefBadge = document.getElementById('tideCoefBadge');
+        if (coefBadge) {
+          const coefVal = t.coef || 78;
+          const coefCat = t.coefCategory || (coefVal >= 70 ? 'ALTO 🌊' : coefVal >= 50 ? 'MEDIO ⚖️' : 'BAJO ⚓');
+          const coefCls = t.coefClass || 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+          coefBadge.className = `text-[10px] font-extrabold px-2 py-0.5 rounded-lg border shadow-sm ${coefCls}`;
+          coefBadge.textContent = `Coef: ${coefVal} · ${coefCat}`;
+        }
+
+        if (t.nextHigh) {
+          document.getElementById('nextHighTime').textContent = t.nextHigh.hora;
+          document.getElementById('nextHighHeight').textContent = `${t.nextHigh.altura} m`;
+          const diffMin = Math.round((t.nextHigh.timestamp - Date.now()) / (1000 * 60));
+          const h = Math.floor(Math.max(diffMin, 0) / 60);
+          const m = Math.max(diffMin, 0) % 60;
+          document.getElementById('nextHighCountdown').textContent = `en ${h}h ${m}m`;
+        }
+        if (t.nextLow) {
+          document.getElementById('nextLowTime').textContent = t.nextLow.hora;
+          document.getElementById('nextLowHeight').textContent = `${t.nextLow.altura} m`;
+          const diffMin = Math.round((t.nextLow.timestamp - Date.now()) / (1000 * 60));
+          const h = Math.floor(Math.max(diffMin, 0) / 60);
+          const m = Math.max(diffMin, 0) % 60;
+          document.getElementById('nextLowCountdown').textContent = `en ${h}h ${m}m`;
+        }
+
+        // Tide List
+        const tList = document.getElementById('tideList');
+        tList.innerHTML = t.events.map(ev => `
+          <div class="p-1 rounded-md border card-inner flex items-center justify-between">
+            <div>
+              <span class="text-[8px] font-bold block uppercase opacity-75">${ev.tipo}</span>
+              <span class="text-[11px] font-black block">${ev.hora}</span>
+            </div>
+            <span class="text-[9px] font-black px-1 py-0.5 rounded card-inner text-cyan-400">${ev.altura}m</span>
+          </div>
+        `).join('');
+
+        renderTideSvg(t);
+      }
+
+      // Marine & Advice
+      if (m) {
+        document.getElementById('marineWaveH').textContent = `${m.hourly?.wave_height?.[0] || 0.8} m`;
+        document.getElementById('marineWaveP').textContent = `Período ${m.hourly?.wave_period?.[0] || 7}s`;
+        document.getElementById('marineSeaT').textContent = `20°C`;
+      }
+
+      const adviceTitle = document.getElementById('beachAdviceTitle');
+      const adviceText = document.getElementById('beachAdviceText');
+      const adviceTag = document.getElementById('beachAdviceTag');
+
+      if (windInfo.isLevante) {
+        adviceTitle.textContent = 'Viento de Levante 🚩';
+        adviceText.textContent = 'El viento del Este suele mover el agua y soplar fuerte. Para resguardo, las murallas de Santa María del Mar ofrecen protección.';
+        if (adviceTag) {
+          adviceTag.className = 'text-[8px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40';
+          adviceTag.textContent = 'PRECAUCIÓN VIENTO';
+        }
+      } else {
+        adviceTitle.textContent = 'Viento de Poniente 🌊';
+        adviceText.textContent = 'Viento fresco atlántico de mar a tierra. Mantiene la estancia muy agradable y genera olas limpias para baño o surf.';
+        if (adviceTag) {
+          adviceTag.className = 'text-[8px] font-black px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+          adviceTag.textContent = 'IDEAL BAÑO & SURF';
+        }
+      }
+
+      // ENHANCED 7-DAY FORECAST WITH HIGHLIGHTED MAX/MIN TEMPS & WEEKLY RANGE BAR
+      const fBox = document.getElementById('forecast7Days');
+      const dDays = w.daily?.time || [];
+      const allMaxs = dDays.map((_, i) => Math.round(w.daily?.temperature_2m_max?.[i] ?? 22));
+      const allMins = dDays.map((_, i) => Math.round(w.daily?.temperature_2m_min?.[i] ?? 16));
+      const weekMaxT = Math.max(...allMaxs);
+      const weekMinT = Math.min(...allMins);
+
+      fBox.innerHTML = dDays.map((dStr, idx) => {
+        const dayName = idx === 0 ? 'Hoy' : idx === 1 ? 'Mañana' : new Date(dStr).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+        const maxT = allMaxs[idx];
+        const minT = allMins[idx];
+        const code = w.daily?.weather_code?.[idx] || 0;
+        const icon = getWeatherInfo(code).icon;
+
+        // Wind Metrics
+        const wSpeed = Math.round(w.daily?.wind_speed_10m_max?.[idx] || 15);
+        const wGusts = Math.round(w.daily?.wind_gusts_10m_max?.[idx] || 25);
+        const wDirDeg = w.daily?.wind_direction_10m_dominant?.[idx] || 270;
+        const wDir = getWindDirectionText(wDirDeg);
+
+        // Rain Metrics
+        const rainSum = w.daily?.precipitation_sum?.[idx] ?? 0;
+        const rainProb = w.daily?.precipitation_probability_max?.[idx] ?? 0;
+
+        // UV Intensity
+        const uvMax = Math.round(w.daily?.uv_index_max?.[idx] || 7);
+
+        const isWeekPeak = maxT === weekMaxT;
+        const isWeekLow = minT === weekMinT;
+
+        // Calculate mini temperature bar width/offset
+        const totalRange = Math.max(weekMaxT - weekMinT, 1);
+        const leftPct = Math.round(((minT - weekMinT) / totalRange) * 100);
+        const widthPct = Math.max(Math.round(((maxT - minT) / totalRange) * 100), 18);
+
+        return `
+          <div class="card-inner rounded-lg px-2 py-1 flex items-center justify-between gap-1 shadow-sm text-[10px]">
+            <!-- Day & Icon -->
+            <div class="flex items-center gap-1.5 w-24 shrink-0">
+              <span class="text-base leading-none">${icon}</span>
+              <span class="font-black uppercase truncate">${dayName}</span>
+            </div>
+
+            <!-- Enhanced Max / Min Temperature Pills -->
+            <div class="flex items-center gap-1 shrink-0">
+              <div class="flex items-center gap-0.5 px-1.5 py-0.5 rounded ${isWeekPeak ? 'bg-amber-500/30 border border-amber-400 text-amber-300 ring-1 ring-amber-400/50' : 'bg-amber-500/10 border border-amber-500/30 text-amber-400'}">
+                <span class="text-[8px] opacity-75">▲</span>
+                <span class="text-[11px] font-black">${maxT}°</span>
+                ${isWeekPeak ? '<span class="text-[7px] font-black text-amber-200 ml-0.5 bg-amber-500/50 px-0.5 rounded">MÁX</span>' : ''}
+              </div>
+
+              <div class="flex items-center gap-0.5 px-1.5 py-0.5 rounded ${isWeekLow ? 'bg-sky-500/30 border border-sky-400 text-sky-300 ring-1 ring-sky-400/50' : 'bg-sky-500/10 border border-sky-500/30 text-sky-400'}">
+                <span class="text-[8px] opacity-75">▼</span>
+                <span class="text-[11px] font-black">${minT}°</span>
+                ${isWeekLow ? '<span class="text-[7px] font-black text-sky-200 ml-0.5 bg-sky-500/50 px-0.5 rounded">MÍN</span>' : ''}
+              </div>
+            </div>
+
+            <!-- Mini Visual Temp Range Bar -->
+            <div class="hidden sm:flex items-center w-16 shrink-0 px-1">
+              <div class="w-full h-1.5 bg-black/40 rounded-full overflow-hidden relative border border-white/10">
+                <div class="absolute top-0 bottom-0 bg-gradient-to-r from-sky-400 via-amber-300 to-rose-400 rounded-full"
+                     style="left: ${leftPct}%; width: ${widthPct}%;"></div>
+              </div>
+            </div>
+
+            <!-- Wind: Speed, Gusts & Direction -->
+            <div class="flex items-center gap-1 w-32 shrink-0 card-inner px-1.5 py-0.5 rounded">
+              <span class="text-cyan-400 font-bold">${wDir.arrow} ${wDir.short}</span>
+              <span class="font-semibold">${wSpeed} km/h</span>
+              <span class="opacity-60 text-[8px]">(rachas ${wGusts})</span>
+            </div>
+
+            <!-- Rain: mm & % -->
+            <div class="flex items-center gap-1 text-blue-400 w-20 shrink-0 font-semibold">
+              <span>💧 ${rainProb}%</span>
+              <span class="opacity-60 text-[8px]">(${rainSum}mm)</span>
+            </div>
+
+            <!-- UV Solar Intensity -->
+            <div class="flex items-center gap-1 text-amber-400 w-16 shrink-0 font-bold justify-end">
+              <span>☀️ UV ${uvMax}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // PWA Prompt Handling
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      state.deferredPrompt = e;
+      const btn = document.getElementById('btnPwaInstall');
+      if (btn) btn.style.display = 'flex';
+    });
+
+    function triggerPwaInstall() {
+      if (state.deferredPrompt) {
+        state.deferredPrompt.prompt();
+        state.deferredPrompt.userChoice.then(() => {
+          state.deferredPrompt = null;
+        });
+      } else {
+        alert('Para instalar Cádiz Meteo en tu pantalla de inicio o Smart TV, pulsa en las opciones de tu navegador y elige "Añadir a la pantalla de inicio" o "Instalar aplicación".');
+      }
+    }
+
+    // Network Status Listeners
+    window.addEventListener('online', () => {
+      const badge = document.getElementById('onlineBadge');
+      if (badge) {
+        badge.className = 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-1 rounded-lg';
+        badge.textContent = '🟢 Online';
+      }
+      loadAllData();
+    });
+
+    window.addEventListener('offline', () => {
+      const badge = document.getElementById('onlineBadge');
+      if (badge) {
+        badge.className = 'bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-bold px-2 py-1 rounded-lg';
+        badge.textContent = '🟠 Cache Local (Offline)';
+      }
+    });
+
+    // Initial Execution
+    loadAllData();
+    setInterval(loadAllData, 10 * 60 * 1000); // 10 minutes auto-refresh
+  </script>
 </body>
 </html>
