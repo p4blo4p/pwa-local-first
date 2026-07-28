@@ -585,7 +585,7 @@
   <script>
     const CADIZ_LAT = 36.5271;
     const CADIZ_LON = -6.2886;
-    const CACHE_KEY = 'cadiz_meteo_no_scroll_v8';
+    const CACHE_KEY = 'cadiz_meteo_madrid_v20';
 
     let state = {
       isTvMode: false,
@@ -595,6 +595,16 @@
       marine: null,
       theme: 'ocean'
     };
+
+    // Helper: Compute exact 00:00:00 Spain (Europe/Madrid) timestamp for a given Date
+    function getSpainMidnightMs(date = new Date()) {
+      const madridStr = date.toLocaleDateString('sv-SE', { timeZone: 'Europe/Madrid' }); // "YYYY-MM-DD"
+      const [y, m, d] = madridStr.split('-').map(Number);
+      const utcCandidate = new Date(Date.UTC(y, m - 1, d, 0, 0, 0)).getTime();
+      const formatted = new Date(utcCandidate).toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', hour12: false });
+      const hourInMadrid = parseInt(formatted, 10) % 24;
+      return utcCandidate - (hourInMadrid * 3600 * 1000);
+    }
 
     // Radical Theme Switcher Logic
     function changeTheme(themeName) {
@@ -613,18 +623,18 @@
       document.getElementById('themeSelect').value = savedTheme;
     }
 
-    // Clock Logic
+    // Clock Logic (Forced to Europe/Madrid time zone)
     function updateClock() {
       const now = new Date();
-      const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const timeStr = now.toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const clockElem = document.getElementById('clockTime');
       if (clockElem) clockElem.textContent = timeStr;
       
       const dateElem = document.getElementById('clockDate');
-      if (dateElem) dateElem.textContent = now.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+      if (dateElem) dateElem.textContent = now.toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid', weekday: 'short', day: 'numeric', month: 'short' });
 
       const badgeElem = document.getElementById('currentTimeBadge');
-      if (badgeElem) badgeElem.textContent = `📍 Ahora: ${now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+      if (badgeElem) badgeElem.textContent = `📍 Ahora: ${now.toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' })}`;
       
       // Re-render tide SVG curve every minute so the sleek indicator stays exact
       if (state.tides) {
@@ -686,26 +696,29 @@
     // Harmonic Tide Fallback Calculation for Cádiz
     function calculateHarmonicTides() {
       const now = new Date();
-      const startOfDay = new Date(now);
-      startOfDay.setHours(0, 0, 0, 0);
+      const dayStartMs = getSpainMidnightMs(now);
 
-      const refEpoch = new Date('2026-01-01T04:30:00Z').getTime();
+      // Cádiz Puerto reference epoch for High Tide (Pleamar): Jan 1, 2026 06:30 UTC
+      const refEpoch = new Date('2026-01-01T06:30:00Z').getTime();
       const halfPeriodMs = (12.4206 * 3600 * 1000) / 2;
       const events = [];
-      const dayStartMs = startOfDay.getTime();
 
-      let currentCycle = Math.floor((dayStartMs - refEpoch) / halfPeriodMs) - 1;
+      let currentCycle = Math.floor((dayStartMs - refEpoch) / halfPeriodMs) - 2;
 
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 10; i++) {
         const cycleTime = refEpoch + (currentCycle + i) * halfPeriodMs;
         const isHigh = (currentCycle + i) % 2 === 0;
         const dateObj = new Date(cycleTime);
-        const hoursStr = String(dateObj.getHours()).padStart(2, '0');
-        const minsStr = String(dateObj.getMinutes()).padStart(2, '0');
+        const horaStr = dateObj.toLocaleTimeString('es-ES', {
+          timeZone: 'Europe/Madrid',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        });
         const height = isHigh ? 3.08 : 0.62;
 
         events.push({
-          hora: `${hoursStr}:${minsStr}`,
+          hora: horaStr,
           tipo: isHigh ? 'Pleamar' : 'Bajamar',
           altura: height,
           timestamp: cycleTime
@@ -908,9 +921,45 @@
             if (rawEvents.length > 0) {
               const parsed = rawEvents.map(x => {
                 const parts = x.hora.split(':');
-                const d = new Date();
-                d.setHours(parseInt(parts[0]), parseInt(parts[1]), 0, 0);
-                return { hora: x.hora, tipo: x.tipo.charAt(0).toUpperCase() + x.tipo.slice(1), altura: parseFloat(x.altura), timestamp: d.getTime() };
+                const utcHours = parseInt(parts[0], 10);
+                const utcMins = parseInt(parts[1], 10);
+
+                const now = new Date();
+                let year = now.getUTCFullYear();
+                let month = now.getUTCMonth();
+                let day = now.getUTCDate();
+
+                if (x.fecha) {
+                  if (x.fecha.includes('-')) {
+                    const fParts = x.fecha.split('-');
+                    year = parseInt(fParts[0], 10);
+                    month = parseInt(fParts[1], 10) - 1;
+                    day = parseInt(fParts[2], 10);
+                  } else if (x.fecha.includes('/')) {
+                    const fParts = x.fecha.split('/');
+                    day = parseInt(fParts[0], 10);
+                    month = parseInt(fParts[1], 10) - 1;
+                    year = parseInt(fParts[2], 10);
+                  }
+                }
+
+                // Create Date in UTC
+                const d = new Date(Date.UTC(year, month, day, utcHours, utcMins, 0, 0));
+
+                // Convert to Spain Local Time (Europe/Madrid) -> handles CEST (UTC+2) / CET (UTC+1)
+                const localHora = d.toLocaleTimeString('es-ES', {
+                  timeZone: 'Europe/Madrid',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false
+                });
+
+                return {
+                  hora: localHora,
+                  tipo: x.tipo.charAt(0).toUpperCase() + x.tipo.slice(1),
+                  altura: parseFloat(x.altura),
+                  timestamp: d.getTime()
+                };
               });
               state.tides = processTides(parsed, rawTide?.mareas?.puerto || 'Puerto de Cádiz');
             }
@@ -938,9 +987,7 @@
       if (!svg || !t || !t.events || t.events.length === 0) return;
 
       const now = new Date();
-      const startOfDay = new Date(now);
-      startOfDay.setHours(0, 0, 0, 0);
-      const dayStartMs = startOfDay.getTime();
+      const dayStartMs = getSpainMidnightMs(now);
       const dayEndMs = dayStartMs + 24 * 3600 * 1000;
       const nowMs = now.getTime();
 
@@ -1089,11 +1136,11 @@
       const ssStr = w.daily?.sunset?.[0];
       if (srStr) {
         const srDate = new Date(srStr);
-        document.getElementById('sunRiseTime').textContent = srDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('sunRiseTime').textContent = srDate.toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' });
       }
       if (ssStr) {
         const ssDate = new Date(ssStr);
-        document.getElementById('sunSetTime').textContent = ssDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('sunSetTime').textContent = ssDate.toLocaleTimeString('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', minute: '2-digit' });
       }
 
       // Beach Rating Calculation
@@ -1168,7 +1215,7 @@
       hBox.innerHTML = keyIndices.map((idx, i) => {
         const tStr = allTimes[idx];
         if (!tStr) return '';
-        const time = new Date(tStr).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        const time = tStr.includes('T') ? tStr.split('T')[1].slice(0, 5) : tStr.slice(11, 16);
         const temp = hourlyTemps[i];
         const rainP = w.hourly?.precipitation_probability?.[idx] || 0;
         const code = w.hourly?.weather_code?.[idx] || 0;
@@ -1303,7 +1350,7 @@
       const weekMinT = Math.min(...allMins);
 
       fBox.innerHTML = dDays.map((dStr, idx) => {
-        const dayName = idx === 0 ? 'Hoy' : idx === 1 ? 'Mañana' : new Date(dStr).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+        const dayName = idx === 0 ? 'Hoy' : idx === 1 ? 'Mañana' : new Date(dStr + 'T12:00:00').toLocaleDateString('es-ES', { timeZone: 'Europe/Madrid', weekday: 'short', day: 'numeric' });
         const maxT = allMaxs[idx];
         const minT = allMins[idx];
         const code = w.daily?.weather_code?.[idx] || 0;
