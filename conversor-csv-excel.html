@@ -1,0 +1,1013 @@
+<!doctype html>
+<html lang="es" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conversor CSV a Excel XLSX - Fechas 19XX y Formato Español</title>
+    <meta name="description" content="Conversor local de CSV a Microsoft Excel (.xlsx) con corrección automática de fechas de nacimiento 19XX y decimales en formato español (coma)." />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Tailwind CSS CDN for instant self-contained rendering -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              slate: {
+                850: '#111827',
+                950: '#030712',
+              }
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- SheetJS (xlsx) for direct XLSX generation -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+      /* Custom scrollbars */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #030712;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #1f2937;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #374151;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col font-sans">
+    
+    <!-- HEADER -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-lg shadow-emerald-950/50">
+            <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 className="text-lg font-bold text-white tracking-tight">
+                Conversor CSV a Excel XLSX
+              </h1>
+              <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                <i data-lucide="sparkles" class="w-3 h-3"></i> España / ES
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 hidden sm:block">
+              Conversión de fechas de nacimiento (36 ➔ 1936) y decimales (.0349 ➔ 0,0349)
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5 text-xs text-slate-300 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-lg">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+            <span class="hidden md:inline font-medium">100% Local & Privado</span>
+            <span class="text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded flex items-center gap-1">
+              <i data-lucide="wifi-off" class="w-3 h-3 text-slate-400"></i> Offline
+            </span>
+          </div>
+
+          <button id="btnReset" class="hidden flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg transition-colors cursor-pointer">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Nuevo Archivo</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      
+      <!-- STEP 1: FILE UPLOAD SECTION -->
+      <section id="uploadSection" class="block">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-4xl mx-auto my-6">
+          <div class="mb-6 text-center">
+            <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">
+              Convierte tu CSV a Excel Microsoft XLSX
+            </h2>
+            <p class="text-sm text-slate-300 max-w-2xl mx-auto">
+              Procesa tu CSV al instante en tu dispositivo. Transforma automáticamente fechas de nacimiento (<code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">12/04/36</code> ➔ <code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">12/04/1936</code>) y formatos numéricos españoles (<code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">.0349</code> ➔ <code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">0,0349</code> y <code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">0.43</code> ➔ <code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">0,43</code>).
+            </p>
+          </div>
+
+          <!-- Tabs -->
+          <div class="flex border-b border-slate-800 mb-6">
+            <button id="tabUploadBtn" class="pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-emerald-500 text-emerald-400 cursor-pointer">
+              <i data-lucide="upload" class="w-4 h-4"></i> Subir Archivo CSV
+            </button>
+            <button id="tabPasteBtn" class="pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer">
+              <i data-lucide="clipboard" class="w-4 h-4"></i> Pegar Texto CSV
+            </button>
+          </div>
+
+          <div id="errorAlert" class="hidden mb-6 p-3 bg-red-900/30 border border-red-700/50 rounded-xl text-red-300 text-xs flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-red-400 shrink-0"></i>
+            <span id="errorMessage"></span>
+          </div>
+
+          <!-- Tab Content: Dropzone -->
+          <div id="tabUploadContent" class="block">
+            <div id="dropzone" class="border-2 border-dashed border-slate-700/80 hover:border-slate-500 bg-slate-950/50 hover:bg-slate-950 rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-all">
+              <input type="file" id="fileInput" accept=".csv,.txt,.tsv" class="hidden" />
+              <div class="h-16 w-16 mx-auto mb-4 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400 shadow-lg">
+                <i data-lucide="upload-cloud" class="w-8 h-8"></i>
+              </div>
+              <p class="text-base font-semibold text-slate-200 mb-1">
+                Haz clic para seleccionar o arrastra tu archivo CSV aquí
+              </p>
+              <p class="text-xs text-slate-400 mb-4">
+                Soporta .csv, .txt y .tsv (separados por ;, ,, TAB o |)
+              </p>
+              <div class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-4 py-2 rounded-xl">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                <span>Procesamiento 100% en tu navegador (sin servidor)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content: Paste -->
+          <div id="tabPasteContent" class="hidden space-y-4">
+            <textarea id="pasteTextarea" rows="8" placeholder="ID;Nombre;Fecha_Nacimiento;Sueldo_Hora&#10;1;Carlos Garcia;12/04/36;.0349&#10;2;Ana Rodriguez;12-04-36;0.43" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors"></textarea>
+            <button id="btnProcessPaste" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-lg shadow-emerald-950/50">
+              <i data-lucide="play" class="w-4 h-4"></i> Procesar Texto Pegado
+            </button>
+          </div>
+
+          <!-- Quick Sample Button -->
+          <div class="mt-8 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+              <i data-lucide="file-text" class="w-4 h-4 text-slate-500"></i>
+              <span>¿Quieres probar la conversión inmediatamente?</span>
+            </div>
+            <button id="btnLoadSample" class="w-full sm:w-auto text-xs font-semibold text-emerald-400 hover:text-emerald-300 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 px-4 py-2 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>Cargar Ejemplo (Fechas 36 ➔ 1936 y Decimales .0349 ➔ 0,0349)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- PWA Privacy Banner -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 my-8 text-xs text-slate-300">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <div class="h-9 w-9 rounded-xl bg-emerald-950 border border-emerald-800/80 flex items-center justify-center text-emerald-400 shrink-0">
+                <i data-lucide="shield" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-sm text-slate-100">Aplicación PWA Autocontenida (Local First)</h4>
+                <p class="text-slate-400 mt-0.5 leading-relaxed">
+                  Todo el archivo HTML contiene las herramientas de conversión necesarias. Tus datos permanecen en tu ordenador sin ser subidos a ningún servidor externo.
+                </p>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-slate-800">
+              <div class="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Fechas: 12/04/36 ➔ 12/04/1936</span>
+              </div>
+              <div class="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
+                <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Decimales: .0349 ➔ 0,0349</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 2: CONVERSION WORKSPACE SECTION -->
+      <section id="workspaceSection" class="hidden">
+        
+        <!-- Metrics Stats -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+              <i data-lucide="table" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-slate-400">Filas / Registros</p>
+              <p id="statRows" class="text-xl font-bold text-white">0</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-indigo-900/40 rounded-2xl p-4 shadow-lg flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-indigo-950/80 border border-indigo-800/60 flex items-center justify-center text-indigo-400 shrink-0">
+              <i data-lucide="calendar" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-indigo-300">Fechas Nac. (19XX)</p>
+              <p id="statBirthDates" class="text-xl font-bold text-indigo-200">0</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-emerald-900/40 rounded-2xl p-4 shadow-lg flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-emerald-950/80 border border-emerald-800/60 flex items-center justify-center text-emerald-400 shrink-0">
+              <i data-lucide="binary" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-emerald-300">Decimales Coma ES</p>
+              <p id="statNumbers" class="text-xl font-bold text-emerald-200">0</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400 shrink-0">
+              <i data-lucide="zap" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-slate-400">Tiempo de Proceso</p>
+              <p id="statTime" class="text-xl font-bold text-white">0 ms</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configuration Settings -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 mb-6 shadow-xl">
+          <div class="flex items-center gap-2 mb-4 text-slate-200 border-b border-slate-800 pb-3">
+            <i data-lucide="settings-2" class="w-5 h-5 text-emerald-400"></i>
+            <h3 class="font-semibold text-sm">Ajustes de Conversión</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Delimiter -->
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+              <label class="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
+                <i data-lucide="file-code" class="w-3.5 h-3.5 text-emerald-400"></i> Separador CSV
+              </label>
+              <select id="selectDelimiter" class="w-full bg-slate-900 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 p-2 focus:outline-none focus:border-emerald-500">
+                <option value="auto">Auto-detectar</option>
+                <option value=";">Punto y coma ( ; ) - Estándar ES</option>
+                <option value=",">Coma ( , )</option>
+                <option value="&#9;">Tabulación ( TAB )</option>
+                <option value="|">Barra vertical ( | )</option>
+              </select>
+            </div>
+
+            <!-- Birth Date Century Rule -->
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+              <label class="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-400"></i> Regla Fechas Nacimiento
+              </label>
+              <select id="selectCentury" class="w-full bg-slate-900 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 p-2 focus:outline-none focus:border-emerald-500">
+                <option value="19">Forzar 19XX para 2 dígitos (36 ➔ 1936)</option>
+                <option value="auto">Detección Inteligente</option>
+              </select>
+            </div>
+
+            <!-- Number Output Mode -->
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+              <label class="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
+                <i data-lucide="binary" class="w-3.5 h-3.5 text-emerald-400"></i> Formato Decimal
+              </label>
+              <select id="selectNumberMode" class="w-full bg-slate-900 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 p-2 focus:outline-none focus:border-emerald-500">
+                <option value="spanish_string">Texto con coma española ("0,0349")</option>
+                <option value="excel_number">Número nativo Excel (0.0349)</option>
+              </select>
+            </div>
+
+            <!-- Header Toggle -->
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
+              <label class="block text-xs font-semibold text-slate-400 mb-1.5">Encabezados</label>
+              <button id="btnToggleHeader" type="button" class="w-full text-xs font-medium py-2 px-3 rounded-lg border bg-emerald-950/60 border-emerald-700/60 text-emerald-300 flex items-center justify-between cursor-pointer">
+                <span>Primera fila es cabecera</span>
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column Classification Cards -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 mb-6 shadow-xl">
+          <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+              <h3 class="font-semibold text-sm text-slate-200">Detección de Columnas</h3>
+            </div>
+            <span class="text-xs text-slate-400">Puedes cambiar manualmente el tipo asignado a cada columna</span>
+          </div>
+          <div id="columnCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+        </div>
+
+        <!-- Preview & Export Table Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden mb-12">
+          <!-- Action bar -->
+          <div class="p-4 sm:p-6 bg-slate-900 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+              <div class="bg-slate-950 p-1 rounded-xl border border-slate-800 flex items-center">
+                <button id="btnViewConverted" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-emerald-600 text-white cursor-pointer shadow">
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i> Vista Convertida
+                </button>
+                <button id="btnViewDiff" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-400 hover:text-slate-200 cursor-pointer">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Comparador (Antes ➔ Después)
+                </button>
+              </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div class="flex items-center bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5">
+                <span class="text-xs text-slate-400 mr-2 font-mono">Nombre:</span>
+                <input type="text" id="outputFilenameInput" value="datos_convertidos" class="bg-transparent text-xs font-medium text-slate-200 focus:outline-none w-36 sm:w-48 font-mono" />
+                <span class="text-xs text-emerald-400 font-mono font-bold">.xlsx</span>
+              </div>
+
+              <button id="btnDownloadXlsx" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/60 transition-colors cursor-pointer">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Descargar Excel (.xlsx)
+              </button>
+
+              <button id="btnDownloadCsv" title="Descargar CSV con ;" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 border border-slate-700 transition-colors cursor-pointer">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i> CSV (;)
+              </button>
+            </div>
+          </div>
+
+          <!-- Search & Filter bar -->
+          <div class="px-4 py-3 bg-slate-950/60 border-b border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div class="relative w-full sm:w-72">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+              <input type="text" id="searchInput" placeholder="Buscar en la tabla..." class="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-slate-600" />
+            </div>
+
+            <div class="flex items-center justify-between w-full sm:w-auto gap-4">
+              <div id="tableRecordCount" class="text-slate-400">Mostrando datos...</div>
+            </div>
+          </div>
+
+          <!-- Table Container -->
+          <div class="overflow-x-auto max-h-[500px]">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead id="tableHeader" class="bg-slate-950 text-slate-400 font-semibold sticky top-0 z-10"></thead>
+              <tbody id="tableBody" class="divide-y divide-slate-800/60 font-mono"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+      <p>Conversor CSV a Excel XLSX • PWA Single File Local First • España</p>
+    </footer>
+
+    <!-- SCRIPT APPLICATION LOGIC -->
+    <script>
+      // Global State
+      let rawCsvText = '';
+      let currentFilename = 'datos.csv';
+      let parsedHeaders = [];
+      let parsedRawRows = [];
+      let detectedDelimiter = ';';
+      let options = {
+        delimiter: 'auto',
+        hasHeader: true,
+        defaultBirthCentury: '19',
+        numberOutputMode: 'spanish_string'
+      };
+      let columnTypes = {}; // index -> 'birth_date' | 'spanish_number' | 'text'
+      let viewMode = 'converted'; // 'converted' or 'diff'
+      let searchTerm = '';
+
+      // Initialize Lucide Icons
+      document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        setupEventListeners();
+      });
+
+      // --- TRANSFORMATION ALGORITHMS ---
+      
+      /**
+       * Transform birth date strings: e.g. "12/04/36", "12-04-36", "12.04.36"
+       * Forces 2-digit years like '36' to '1936' (not '2036') for birth dates.
+       */
+      function transformBirthDate(val) {
+        if (!val || typeof val !== 'string') return { transformed: val, wasModified: false };
+        const trimmed = val.trim();
+        if (!trimmed) return { transformed: val, wasModified: false };
+
+        // Match DD/MM/YY or DD-MM-YY or DD.MM.YY (with 2-digit year)
+        const match2Digit = trimmed.match(/^(\d{1,2})([\/\-\.])(\d{1,2})\2(\d{2})$/);
+        if (match2Digit) {
+          const day = match2Digit[1].padStart(2, '0');
+          const sep = match2Digit[2];
+          const month = match2Digit[3].padStart(2, '0');
+          const shortYear = match2Digit[4];
+          const fullYear = `19${shortYear}`;
+          const result = `${day}${sep}${month}${sep}${fullYear}`;
+          return { transformed: result, wasModified: result !== trimmed };
+        }
+
+        // Match DD/MM/YYYY with 4-digit year
+        const match4Digit = trimmed.match(/^(\d{1,2})([\/\-\.])(\d{1,2})\2(\d{4})$/);
+        if (match4Digit) {
+          const day = match4Digit[1].padStart(2, '0');
+          const sep = match4Digit[2];
+          const month = match4Digit[3].padStart(2, '0');
+          const year = match4Digit[4];
+          const result = `${day}${sep}${month}${sep}${year}`;
+          return { transformed: result, wasModified: result !== trimmed };
+        }
+
+        return { transformed: trimmed, wasModified: false };
+      }
+
+      /**
+       * Transform numeric values into Spanish comma decimal format:
+       * e.g., ".0349" ➔ "0,0349", "0.43" ➔ "0,43", ",0349" ➔ "0,0349"
+       */
+      function transformSpanishNumber(val) {
+        if (!val || typeof val !== 'string') return { transformed: val, numericVal: null, wasModified: false };
+        const trimmed = val.trim();
+        if (!trimmed) return { transformed: val, numericVal: null, wasModified: false };
+
+        let normalized = trimmed;
+        let wasModified = false;
+
+        // Case: Starts with dot e.g. ".0349" or "-.0349" -> "0.0349"
+        if (/^[-+]?\.\d+$/.test(normalized)) {
+          const sign = normalized.startsWith('-') ? '-' : normalized.startsWith('+') ? '+' : '';
+          const digits = normalized.replace(/^[-+]\./, '').replace(/^\./, '');
+          normalized = `${sign}0.${digits}`;
+          wasModified = true;
+        }
+        // Case: Starts with comma e.g. ",0349" or "-,0349" -> "0,0349"
+        else if (/^[-+]?\,\d+$/.test(normalized)) {
+          const sign = normalized.startsWith('-') ? '-' : normalized.startsWith('+') ? '+' : '';
+          const digits = normalized.replace(/^[-+]\,/, '').replace(/^\,/, '');
+          normalized = `${sign}0,${digits}`;
+          wasModified = true;
+        }
+
+        // Dot decimal format e.g. 0.43 or 0.0349
+        if (/^[-+]?\d+\.\d+$/.test(normalized)) {
+          const num = parseFloat(normalized);
+          const spanishStr = normalized.replace('.', ',');
+          return { transformed: spanishStr, numericVal: isNaN(num) ? null : num, wasModified: true };
+        }
+
+        // Comma decimal format e.g. 0,43 or 0,0349
+        if (/^[-+]?\d+\,\d+$/.test(normalized)) {
+          const num = parseFloat(normalized.replace(',', '.'));
+          return { transformed: normalized, numericVal: isNaN(num) ? null : num, wasModified: wasModified };
+        }
+
+        // Integers e.g. "42"
+        if (/^[-+]?\d+$/.test(normalized)) {
+          const num = parseInt(normalized, 10);
+          return { transformed: normalized, numericVal: isNaN(num) ? null : num, wasModified: trimmed !== normalized };
+        }
+
+        return { transformed: trimmed, numericVal: null, wasModified: false };
+      }
+
+      /**
+       * Detect column type from sample cell values
+       */
+      function detectColumnType(sampleValues) {
+        const clean = sampleValues.map(s => (s || '').trim()).filter(s => s.length > 0);
+        if (clean.length === 0) return 'text';
+
+        let birthScore = 0;
+        let numScore = 0;
+
+        for (const val of clean) {
+          if (/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.](\d{2}|\d{4})$/.test(val)) {
+            birthScore++;
+          } else if (/^[-+]?(\.\d+|\,\d+|\d+\.\d+|\d+\,\d+)$/.test(val)) {
+            numScore++;
+          }
+        }
+
+        const threshold = Math.ceil(clean.length * 0.35);
+        if (birthScore >= threshold && birthScore >= numScore) return 'birth_date';
+        if (numScore >= threshold) return 'spanish_number';
+        return 'text';
+      }
+
+      /**
+       * CSV Delimiter Auto-Detection
+       */
+      function detectDelimiter(text) {
+        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+        if (lines.length === 0) return ';';
+        const candidates = [';', ',', '\t', '|'];
+        const firstLine = lines[0];
+        let best = ';';
+        let maxCount = -1;
+        for (const d of candidates) {
+          const count = (firstLine.split(d).length - 1);
+          if (count > maxCount) {
+            maxCount = count;
+            best = d;
+          }
+        }
+        return best;
+      }
+
+      /**
+       * CSV Parser
+       */
+      function parseCsv(rawText, delim) {
+        const text = rawText.replace(/^\uFEFF/, '');
+        const actualDelim = delim === 'auto' ? detectDelimiter(text) : delim;
+        detectedDelimiter = actualDelim;
+
+        const rows = [];
+        let currentRow = [];
+        let currentToken = '';
+        let insideQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+          const char = text[i];
+          const nextChar = text[i + 1];
+
+          if (insideQuotes) {
+            if (char === '"') {
+              if (nextChar === '"') {
+                currentToken += '"';
+                i++;
+              } else {
+                insideQuotes = false;
+              }
+            } else {
+              currentToken += char;
+            }
+          } else {
+            if (char === '"') {
+              insideQuotes = true;
+            } else if (char === actualDelim) {
+              currentRow.push(currentToken.trim());
+              currentToken = '';
+            } else if (char === '\r' || char === '\n') {
+              if (char === '\r' && nextChar === '\n') i++;
+              currentRow.push(currentToken.trim());
+              if (currentRow.some(c => c.length > 0)) rows.push(currentRow);
+              currentRow = [];
+              currentToken = '';
+            } else {
+              currentToken += char;
+            }
+          }
+        }
+
+        if (currentToken || currentRow.length > 0) {
+          currentRow.push(currentToken.trim());
+          if (currentRow.some(c => c.length > 0)) rows.push(currentRow);
+        }
+
+        if (rows.length === 0) return { headers: [], rows: [] };
+
+        let headers = [];
+        let dataRows = [];
+
+        if (options.hasHeader) {
+          headers = rows[0].map((h, idx) => h || `Columna ${idx + 1}`);
+          dataRows = rows.slice(1);
+        } else {
+          const maxCols = Math.max(...rows.map(r => r.length), 0);
+          headers = Array.from({ length: maxCols }, (_, i) => `Columna ${i + 1}`);
+          dataRows = rows;
+        }
+
+        return { headers, rows: dataRows };
+      }
+
+      // --- PROCESS & RENDER WORKSPACE ---
+
+      function processAndRender() {
+        if (!rawCsvText) return;
+
+        const startTime = performance.now();
+        const parsed = parseCsv(rawCsvText, options.delimiter);
+        parsedHeaders = parsed.headers;
+        parsedRawRows = parsed.rows;
+
+        // Auto detect column types if not set
+        parsedHeaders.forEach((_, cIdx) => {
+          if (!columnTypes[cIdx]) {
+            const samples = parsedRawRows.slice(0, 25).map(r => r[cIdx] || '');
+            columnTypes[cIdx] = detectColumnType(samples);
+          }
+        });
+
+        // Execute transformations
+        let birthDatesCount = 0;
+        let numbersCount = 0;
+
+        const transformedRows = parsedRawRows.map((row, rIdx) => {
+          const cells = parsedHeaders.map((_, cIdx) => {
+            const rawVal = row[cIdx] || '';
+            const colType = columnTypes[cIdx] || 'text';
+
+            let res = { transformed: rawVal, wasModified: false };
+            if (colType === 'birth_date') {
+              res = transformBirthDate(rawVal);
+              if (res.wasModified) birthDatesCount++;
+            } else if (colType === 'spanish_number') {
+              res = transformSpanishNumber(rawVal);
+              if (res.wasModified) numbersCount++;
+            }
+
+            return {
+              original: rawVal,
+              transformed: res.transformed,
+              numericVal: res.numericVal,
+              type: colType,
+              wasModified: res.wasModified
+            };
+          });
+
+          return { rowIndex: rIdx, cells };
+        });
+
+        const endTime = performance.now();
+        const duration = Math.max(1, Math.round(endTime - startTime));
+
+        // Render Stats
+        document.getElementById('statRows').textContent = transformedRows.length.toLocaleString('es-ES');
+        document.getElementById('statBirthDates').textContent = birthDatesCount.toLocaleString('es-ES');
+        document.getElementById('statNumbers').textContent = numbersCount.toLocaleString('es-ES');
+        document.getElementById('statTime').textContent = `${duration} ms`;
+
+        // Render Column Settings Cards
+        renderColumnCards();
+
+        // Render Table Data
+        renderTable(transformedRows);
+
+        // Store active transformed rows globally
+        window.activeTransformedRows = transformedRows;
+      }
+
+      function renderColumnCards() {
+        const container = document.getElementById('columnCardsContainer');
+        container.innerHTML = '';
+
+        parsedHeaders.forEach((colName, cIdx) => {
+          const currentType = columnTypes[cIdx] || 'text';
+
+          const card = document.createElement('div');
+          card.className = 'bg-slate-950 border border-slate-800 p-3 rounded-xl flex flex-col justify-between';
+
+          card.innerHTML = `
+            <div class="mb-2">
+              <div class="flex items-center justify-between gap-1 mb-1">
+                <span class="text-xs font-bold text-slate-200 truncate" title="${colName}">${colName}</span>
+                <span class="text-[10px] font-mono text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded">Col ${cIdx + 1}</span>
+              </div>
+            </div>
+            <select data-col="${cIdx}" class="colTypeSelect w-full bg-slate-900 border border-slate-800 rounded-lg text-xs font-medium text-slate-300 p-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer">
+              <option value="birth_date" ${currentType === 'birth_date' ? 'selected' : ''}>🎂 Fecha Nac. (36 ➔ 1936)</option>
+              <option value="spanish_number" ${currentType === 'spanish_number' ? 'selected' : ''}>🔢 Número ES (.0349 ➔ 0,0349)</option>
+              <option value="text" ${currentType === 'text' ? 'selected' : ''}>🔤 Texto Sin Cambios</option>
+            </select>
+          `;
+
+          container.appendChild(card);
+        });
+
+        // Add change listeners
+        document.querySelectorAll('.colTypeSelect').forEach(select => {
+          select.addEventListener('change', (e) => {
+            const colIdx = parseInt(e.target.getAttribute('data-col'), 10);
+            columnTypes[colIdx] = e.target.value;
+            processAndRender();
+          });
+        });
+      }
+
+      function renderTable(transformedRows) {
+        const thead = document.getElementById('tableHeader');
+        const tbody = document.getElementById('tableBody');
+
+        // Render Header
+        let headerHtml = '<tr><th class="p-3 border-b border-slate-800 w-12 text-center text-slate-500 font-mono">#</th>';
+        parsedHeaders.forEach((h, cIdx) => {
+          const colType = columnTypes[cIdx];
+          let badge = '';
+          if (colType === 'birth_date') badge = '<span class="text-[10px] text-indigo-400 bg-indigo-950 px-1.5 py-0.5 rounded ml-1.5">19XX</span>';
+          if (colType === 'spanish_number') badge = '<span class="text-[10px] text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded ml-1.5">0,00</span>';
+
+          headerHtml += `<th class="p-3 border-b border-slate-800 font-bold text-slate-200"><div class="flex items-center">${h}${badge}</div></th>`;
+        });
+        headerHtml += '</tr>';
+        thead.innerHTML = headerHtml;
+
+        // Filter rows
+        let rowsToDisplay = transformedRows;
+        if (searchTerm.trim()) {
+          const term = searchTerm.toLowerCase();
+          rowsToDisplay = transformedRows.filter(r =>
+            r.cells.some(c => c.original.toLowerCase().includes(term) || c.transformed.toLowerCase().includes(term))
+          );
+        }
+
+        document.getElementById('tableRecordCount').textContent = `Mostrando ${rowsToDisplay.length} registros`;
+
+        // Render Body
+        if (rowsToDisplay.length === 0) {
+          tbody.innerHTML = `<tr><td colSpan="${parsedHeaders.length + 1}" class="p-8 text-center text-slate-500 italic">No se encontraron resultados</td></tr>`;
+          return;
+        }
+
+        let bodyHtml = '';
+        rowsToDisplay.slice(0, 100).forEach((row) => {
+          bodyHtml += `<tr class="hover:bg-slate-800/40 transition-colors">`;
+          bodyHtml += `<td class="p-3 text-center text-slate-500 font-sans text-[11px]">${row.rowIndex + 1}</td>`;
+
+          row.cells.forEach((cell) => {
+            if (viewMode === 'converted') {
+              const bgClass = cell.wasModified
+                ? cell.type === 'birth_date'
+                  ? 'bg-indigo-950/30 text-indigo-200 font-semibold border-l-2 border-indigo-500'
+                  : 'bg-emerald-950/30 text-emerald-200 font-semibold border-l-2 border-emerald-500'
+                : 'text-slate-300';
+
+              bodyHtml += `<td class="p-3 ${bgClass}">${escapeHtml(cell.transformed)}</td>`;
+            } else {
+              // Diff View
+              if (cell.wasModified) {
+                const badgeClass = cell.type === 'birth_date'
+                  ? 'bg-indigo-950 text-indigo-300 border-indigo-800'
+                  : 'bg-emerald-950 text-emerald-300 border-emerald-800';
+
+                bodyHtml += `<td class="p-3">
+                  <div class="flex items-center gap-1.5 text-[11px]">
+                    <span class="line-through text-slate-500 bg-slate-950 px-1 py-0.5 rounded">${escapeHtml(cell.original)}</span>
+                    <i data-lucide="arrow-right" class="w-3 h-3 text-emerald-400"></i>
+                    <span class="font-bold px-1.5 py-0.5 rounded border ${badgeClass}">${escapeHtml(cell.transformed)}</span>
+                  </div>
+                </td>`;
+              } else {
+                bodyHtml += `<td class="p-3 text-slate-400">${escapeHtml(cell.transformed)}</td>`;
+              }
+            }
+          });
+
+          bodyHtml += `</tr>`;
+        });
+
+        tbody.innerHTML = bodyHtml;
+        lucide.createIcons();
+      }
+
+      function escapeHtml(str) {
+        return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      // --- EXPORT FUNCTIONALITY ---
+
+      function downloadXlsx() {
+        if (!window.activeTransformedRows || window.activeTransformedRows.length === 0) return;
+
+        const wb = XLSX.utils.book_new();
+        const matrix = [];
+
+        // Header
+        matrix.push(parsedHeaders);
+
+        // Rows
+        window.activeTransformedRows.forEach(row => {
+          const rowVals = row.cells.map(cell => {
+            if (cell.type === 'spanish_number' && options.numberOutputMode === 'excel_number') {
+              const dotStr = cell.transformed.replace(',', '.');
+              const num = parseFloat(dotStr);
+              return isNaN(num) ? cell.transformed : num;
+            }
+            return cell.transformed;
+          });
+          matrix.push(rowVals);
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(matrix);
+
+        // Auto Column Widths
+        const colWidths = parsedHeaders.map((header, cIdx) => {
+          let maxLen = header ? header.length : 10;
+          window.activeTransformedRows.slice(0, 100).forEach(r => {
+            const val = r.cells[cIdx] ? r.cells[cIdx].transformed : '';
+            if (val && val.length > maxLen) maxLen = val.length;
+          });
+          return { wch: Math.min(Math.max(maxLen + 3, 12), 40) };
+        });
+        ws['!cols'] = colWidths;
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Datos Convertidos');
+
+        const outName = document.getElementById('outputFilenameInput').value.trim() || 'datos_convertidos';
+        const finalName = outName.endsWith('.xlsx') ? outName : `${outName}.xlsx`;
+        XLSX.writeFile(wb, finalName);
+      }
+
+      function downloadCsv() {
+        if (!window.activeTransformedRows || window.activeTransformedRows.length === 0) return;
+
+        const lines = [];
+        lines.push(parsedHeaders.map(h => `"${h.replace(/"/g, '""')}"`).join(';'));
+
+        window.activeTransformedRows.forEach(row => {
+          const rowStr = row.cells.map(c => `"${(c.transformed || '').replace(/"/g, '""')}"`).join(';');
+          lines.push(rowStr);
+        });
+
+        const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const outName = document.getElementById('outputFilenameInput').value.trim() || 'datos_convertidos';
+        link.download = `${outName}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // --- EVENT LISTENERS ---
+
+      function setupEventListeners() {
+        const fileInput = document.getElementById('fileInput');
+        const dropzone = document.getElementById('dropzone');
+
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (file) handleFile(file);
+        });
+
+        dropzone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          dropzone.classList.add('border-emerald-500', 'bg-emerald-950/20');
+        });
+
+        dropzone.addEventListener('dragleave', (e) => {
+          e.preventDefault();
+          dropzone.classList.remove('border-emerald-500', 'bg-emerald-950/20');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          dropzone.classList.remove('border-emerald-500', 'bg-emerald-950/20');
+          const file = e.dataTransfer.files[0];
+          if (file) handleFile(file);
+        });
+
+        // Tabs
+        const tabUploadBtn = document.getElementById('tabUploadBtn');
+        const tabPasteBtn = document.getElementById('tabPasteBtn');
+        const tabUploadContent = document.getElementById('tabUploadContent');
+        const tabPasteContent = document.getElementById('tabPasteContent');
+
+        tabUploadBtn.addEventListener('click', () => {
+          tabUploadBtn.className = 'pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-emerald-500 text-emerald-400 cursor-pointer';
+          tabPasteBtn.className = 'pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer';
+          tabUploadContent.classList.remove('hidden');
+          tabPasteContent.classList.add('hidden');
+        });
+
+        tabPasteBtn.addEventListener('click', () => {
+          tabPasteBtn.className = 'pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-emerald-500 text-emerald-400 cursor-pointer';
+          tabUploadBtn.className = 'pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer';
+          tabPasteContent.classList.remove('hidden');
+          tabUploadContent.classList.add('hidden');
+        });
+
+        // Process Paste Button
+        document.getElementById('btnProcessPaste').addEventListener('click', () => {
+          const text = document.getElementById('pasteTextarea').value;
+          if (!text.trim()) return showRuleError('Por favor pega texto en formato CSV.');
+          currentFilename = 'texto_pegado.csv';
+          loadTextAndSwitchWorkspace(text);
+        });
+
+        // Load Sample
+        document.getElementById('btnLoadSample').addEventListener('click', () => {
+          const sample = [
+            'ID;Nombre;Fecha_Nacimiento;Sueldo_Hora;Ratio_Productividad;Ciudad',
+            '1;Carlos Garcia;12/04/36;.0349;0.43;Madrid',
+            '2;Ana Rodriguez;12-04-36;12.50;.875;Barcelona',
+            '3;Jose Lopez;25/11/48;0.0349;0,43;Valencia',
+            '4;Maria Fernandez;05-09-55;15.75;1.25;Sevilla',
+            '5;David Martin;18/02/72;.0890;.65;Bilbao',
+            '6;Elena Gomez;30-10-85;22.10;0.92;Zaragoza',
+            '7;Javier Ruiz;01/01/99;,0349;0,43;Malaga',
+            '8;Lucia Diaz;14/06/05;18.00;.999;Alicante'
+          ].join('\n');
+          currentFilename = 'ejemplo_fechas_y_numeros.csv';
+          loadTextAndSwitchWorkspace(sample);
+        });
+
+        // Reset
+        document.getElementById('btnReset').addEventListener('click', () => {
+          rawCsvText = '';
+          columnTypes = {};
+          document.getElementById('uploadSection').classList.remove('hidden');
+          document.getElementById('workspaceSection').classList.add('hidden');
+          document.getElementById('btnReset').classList.add('hidden');
+        });
+
+        // Options
+        document.getElementById('selectDelimiter').addEventListener('change', (e) => {
+          options.delimiter = e.target.value;
+          processAndRender();
+        });
+
+        document.getElementById('selectCentury').addEventListener('change', (e) => {
+          options.defaultBirthCentury = e.target.value;
+          processAndRender();
+        });
+
+        document.getElementById('selectNumberMode').addEventListener('change', (e) => {
+          options.numberOutputMode = e.target.value;
+          processAndRender();
+        });
+
+        document.getElementById('btnToggleHeader').addEventListener('click', () => {
+          options.hasHeader = !options.hasHeader;
+          const btn = document.getElementById('btnToggleHeader');
+          if (options.hasHeader) {
+            btn.className = 'w-full text-xs font-medium py-2 px-3 rounded-lg border bg-emerald-950/60 border-emerald-700/60 text-emerald-300 flex items-center justify-between cursor-pointer';
+            btn.innerHTML = `<span>Primera fila es cabecera</span><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>`;
+          } else {
+            btn.className = 'w-full text-xs font-medium py-2 px-3 rounded-lg border bg-slate-900 border-slate-700 text-slate-400 flex items-center justify-between cursor-pointer';
+            btn.innerHTML = `<span>Sin cabecera</span>`;
+          }
+          lucide.createIcons();
+          processAndRender();
+        });
+
+        // View Mode Toggle
+        const btnViewConverted = document.getElementById('btnViewConverted');
+        const btnViewDiff = document.getElementById('btnViewDiff');
+
+        btnViewConverted.addEventListener('click', () => {
+          viewMode = 'converted';
+          btnViewConverted.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-emerald-600 text-white cursor-pointer shadow';
+          btnViewDiff.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-400 hover:text-slate-200 cursor-pointer';
+          renderTable(window.activeTransformedRows);
+        });
+
+        btnViewDiff.addEventListener('click', () => {
+          viewMode = 'diff';
+          btnViewDiff.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-indigo-600 text-white cursor-pointer shadow';
+          btnViewConverted.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-400 hover:text-slate-200 cursor-pointer';
+          renderTable(window.activeTransformedRows);
+        });
+
+        // Search
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+          searchTerm = e.target.value;
+          renderTable(window.activeTransformedRows);
+        });
+
+        // Download
+        document.getElementById('btnDownloadXlsx').addEventListener('click', downloadXlsx);
+        document.getElementById('btnDownloadCsv').addEventListener('click', downloadCsv);
+      }
+
+      function handleFile(file) {
+        if (!file.name.match(/\.(csv|txt|tsv)$/i)) {
+          return showRuleError('Por favor selecciona un archivo .csv, .txt o .tsv');
+        }
+        currentFilename = file.name;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          loadTextAndSwitchWorkspace(e.target.result);
+        };
+        reader.readAsText(file, 'UTF-8');
+      }
+
+      function loadTextAndSwitchWorkspace(text) {
+        rawCsvText = text;
+        columnTypes = {};
+        const cleanName = currentFilename.replace(/\.(csv|txt|tsv)$/i, '') + '_excel';
+        document.getElementById('outputFilenameInput').value = cleanName;
+
+        document.getElementById('uploadSection').classList.add('hidden');
+        document.getElementById('workspaceSection').classList.remove('hidden');
+        document.getElementById('btnReset').classList.remove('hidden');
+
+        processAndRender();
+      }
+
+      function showRuleError(msg) {
+        const errorAlert = document.getElementById('errorAlert');
+        document.getElementById('errorMessage').textContent = msg;
+        errorAlert.classList.remove('hidden');
+      }
+    </script>
+  </body>
+</html>
