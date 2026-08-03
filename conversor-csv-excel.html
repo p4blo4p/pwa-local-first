@@ -3,375 +3,574 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Conversor CSV a Excel XLSX - Fechas 19XX y Formato Español</title>
+    <title>Conversor CSV a Excel XLSX - Local First</title>
     <meta name="description" content="Conversor local de CSV a Microsoft Excel (.xlsx) con corrección automática de fechas de nacimiento 19XX y decimales en formato español (coma)." />
     <meta name="theme-color" content="#0f172a" />
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%2310b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>' />
 
-    <!-- Tailwind CSS CDN for instant self-contained rendering -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              slate: {
-                850: '#111827',
-                950: '#030712',
-              }
-            }
-          }
-        }
-      }
-    </script>
-
-    <!-- SheetJS (xlsx) for direct XLSX generation -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- PWA manifest embebido -->
+    <link rel="manifest" href='data:application/manifest+json;base64,eyJuYW1lIjoiQ29udmVyc29yIENTViBhIFhMU1giLCJzaG9ydF9uYW1lIjoiQ1NWIFhMU1giLCJzdGFydF91cmwiOiIuLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwZjE3MmEiLCJ0aGVtZV9jb2xvciI6IiMwZjE3MmEiLCJpY29ucyI6W119' />
 
     <style>
-      /* Custom scrollbars */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+      :root {
+        --bg: #030712;
+        --bg-elev: #111827;
+        --bg-card: #0f172a;
+        --border: #1f2937;
+        --text: #e5e7eb;
+        --text-dim: #9ca3af;
+        --accent: #10b981;
+        --accent-2: #059669;
+        --indigo: #6366f1;
+        --indigo-2: #4f46e5;
+        --warn: #f59e0b;
+        --err: #ef4444;
       }
-      ::-webkit-scrollbar-track {
-        background: #030712;
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.4;
       }
-      ::-webkit-scrollbar-thumb {
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: var(--bg); }
+      ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+
+      .container { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
         background: #1f2937;
-        border-radius: 4px;
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
       }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #374151;
+      .btn:hover { background: #374151; }
+      .btn-primary {
+        background: var(--accent);
+        border-color: var(--accent-2);
+        color: #052e24;
       }
+      .btn-primary:hover { background: var(--accent-2); }
+      .btn-outline {
+        background: transparent;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        border: 1px solid var(--border);
+        background: #111827;
+        color: var(--text-dim);
+      }
+
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        background: rgba(15, 23, 42, 0.9);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(8px);
+      }
+      .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 64px;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo-icon {
+        width: 40px; height: 40px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--accent), var(--indigo));
+        display: grid;
+        place-items: center;
+        color: white;
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+      .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      @media (max-width: 900px) {
+        .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+      }
+
+      .dropzone {
+        border: 2px dashed var(--border);
+        border-radius: 16px;
+        padding: 40px 24px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.15s;
+        background: rgba(15, 23, 42, 0.4);
+      }
+      .dropzone:hover, .dropzone.drag {
+        border-color: var(--accent);
+        background: rgba(16, 185, 129, 0.06);
+      }
+
+      .input, .select, .textarea {
+        width: 100%;
+        background: #0b1220;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        color: var(--text);
+        font-size: 13px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        outline: none;
+      }
+      .input:focus, .select:focus, .textarea:focus {
+        border-color: var(--accent);
+      }
+
+      .table-wrap {
+        overflow: auto;
+        max-height: 500px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+      }
+      th, td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        white-space: nowrap;
+      }
+      th {
+        background: #0b1220;
+        color: var(--text-dim);
+        font-weight: 700;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      tbody tr:hover { background: rgba(255,255,255,0.03); }
+
+      .badge {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: #111827;
+        color: var(--text-dim);
+        font-weight: 700;
+      }
+      .badge-indigo {
+        background: rgba(99, 102, 241, 0.15);
+        color: #a5b4fc;
+        border-color: rgba(99, 102, 241, 0.4);
+      }
+      .badge-emerald {
+        background: rgba(16, 185, 129, 0.15);
+        color: #6ee7b7;
+        border-color: rgba(16, 185, 129, 0.4);
+      }
+
+      .hidden { display: none !important; }
+      .muted { color: var(--text-dim); }
+      .center { text-align: center; }
+      .mt-2 { margin-top: 8px; }
+      .mt-4 { margin-top: 16px; }
+      .mb-2 { margin-bottom: 8px; }
+      .mb-4 { margin-bottom: 16px; }
+      .flex { display: flex; gap: 8px; align-items: center; }
+      .flex-wrap { flex-wrap: wrap; }
+      .justify-between { justify-content: space-between; }
+      .grow { flex: 1; }
     </style>
+
+    <!-- SheetJS (xlsx) embebido minimal (solo lo necesario para XLSX básico) -->
+    <script>
+      // Implementación mínima para generar XLSX simple (sin dependencias externas).
+      // Basada en estructuras OOXML básicas en zip.
+      // Para mantener el archivo único, se usa una versión reducida.
+      // Si necesitas todas las funciones de SheetJS, puedes reemplazar este bloque
+      // pegando el contenido completo de xlsx.full.min.js aquí.
+      const XLSX = (function() {
+        // Utilidades ZIP
+        function strToUtf8(s) { return new TextEncoder().encode(s); }
+        function u8ToB64(u8) {
+          let b = '';
+          for (let i = 0; i < u8.length; i++) b += String.fromCharCode(u8[i]);
+          return btoa(b);
+        }
+        function crc32(u8) {
+          let c = -1;
+          const table = makeCRCTable();
+          for (let i = 0; i < u8.length; i++) {
+            c = (c >>> 8) ^ table[(c ^ u8[i]) & 0xff];
+          }
+          return (c ^ -1) >>> 0;
+        }
+        function makeCRCTable() {
+          const t = new Uint32Array(256);
+          for (let i = 0; i < 256; i++) {
+            let c = i;
+            for (let j = 0; j < 8; j++) {
+              c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+            }
+            t[i] = c >>> 0;
+          }
+          return t;
+        }
+        function zipEntry(name, data) {
+          const nameBytes = strToUtf8(name);
+          const crc = crc32(data);
+          const compData = data; // sin compresión para simplificar
+          const localHeader = new Uint8Array(30 + nameBytes.length + compData.length);
+          const view = new DataView(localHeader.buffer);
+          let off = 0;
+          // local file header signature
+          view.setUint32(off, 0x04034b50, true); off += 4;
+          view.setUint16(off, 20, true); off += 2; // version needed
+          view.setUint16(off, 0, true); off += 2; // flags
+          view.setUint16(off, 0, true); off += 2; // compression (store)
+          view.setUint16(off, 0, true); off += 2; // mod time
+          view.setUint16(off, 0, true); off += 2; // mod date
+          view.setUint32(off, crc, true); off += 4;
+          view.setUint32(off, compData.length, true); off += 4;
+          view.setUint32(off, compData.length, true); off += 4;
+          view.setUint16(off, nameBytes.length, true); off += 2;
+          view.setUint16(off, 0, true); off += 2; // extra field length
+          off += nameBytes.length;
+          nameBytes.forEach((b, i) => localHeader[off + i] = b);
+          off += nameBytes.length;
+          compData.forEach((b, i) => localHeader[off + i] = b);
+          return { local: localHeader, name, data, crc, size: compData.length };
+        }
+        function buildZip(entries) {
+          const parts = [];
+          const central = [];
+          let offset = 0;
+          entries.forEach(e => {
+            parts.push(e.local);
+            const nameBytes = strToUtf8(e.name);
+            const ch = new Uint8Array(46 + nameBytes.length);
+            const v = new DataView(ch.buffer);
+            let o = 0;
+            v.setUint32(o, 0x02014b50, true); o += 4;
+            v.setUint16(o, 20, true); o += 2;
+            v.setUint16(o, 20, true); o += 2;
+            v.setUint16(o, 0, true); o += 2;
+            v.setUint16(o, 0, true); o += 2;
+            v.setUint16(o, 0, true); o += 2;
+            v.setUint32(o, e.crc, true); o += 4;
+            v.setUint32(o, e.size, true); o += 4;
+            v.setUint32(o, e.size, true); o += 4;
+            v.setUint16(o, nameBytes.length, true); o += 2;
+            v.setUint16(o, 0, true); o += 2;
+            v.setUint16(o, 0, true); o += 2;
+            v.setUint16(o, 0, true); o += 2;
+            v.setUint32(o, offset, true); o += 4;
+            nameBytes.forEach((b, i) => ch[o + i] = b);
+            central.push(ch);
+            offset += e.local.length;
+          });
+          const centralStart = offset;
+          const centralDir = new Uint8Array(central.reduce((a, c) => a + c.length, 0));
+          let p = 0;
+          central.forEach(c => {
+            centralDir.set(c, p);
+            p += c.length;
+          });
+          const eocd = new Uint8Array(22);
+          const ev = new DataView(eocd.buffer);
+          let q = 0;
+          ev.setUint32(q, 0x06054b50, true); q += 4;
+          ev.setUint16(q, 0, true); q += 2;
+          ev.setUint16(q, 0, true); q += 2;
+          ev.setUint16(q, entries.length, true); q += 2;
+          ev.setUint16(q, entries.length, true); q += 2;
+          ev.setUint32(q, centralDir.length, true); q += 4;
+          ev.setUint32(q, centralStart, true); q += 4;
+          ev.setUint16(q, 0, true); q += 2;
+          const out = new Uint8Array(parts.reduce((a, x) => a + x.length, 0) + centralDir.length + 22);
+          let pos = 0;
+          parts.forEach(x => { out.set(x, pos); pos += x.length; });
+          out.set(centralDir, pos); pos += centralDir.length;
+          out.set(eocd, pos);
+          return out;
+        }
+
+        function aoaToSheet(data) {
+          // Retorna una estructura simple compatible con nuestro writer
+          return { data };
+        }
+        function bookNew() { return { sheets: [] }; }
+        function bookAppendSheet(wb, ws, name) {
+          wb.sheets.push({ name, ws });
+        }
+        function writeFile(wb, filename) {
+          // Generar archivos básicos de OOXML
+          const files = [];
+          // [Content_Types].xml
+          let ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>';
+          files.push(zipEntry('[Content_Types].xml', strToUtf8(ct)));
+
+          // _rels/.rels
+          let rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+          files.push(zipEntry('_rels/.rels', strToUtf8(rels)));
+
+          // xl/workbook.xml
+          let wbxml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>';
+          wb.sheets.forEach((s, i) => {
+            wbxml += `<sheet name="${escapeXml(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`;
+          });
+          wbxml += '</sheets></workbook>';
+          files.push(zipEntry('xl/workbook.xml', strToUtf8(wbxml)));
+
+          // xl/worksheets/sheet1.xml
+          const ws = wb.sheets[0].ws;
+          let maxRow = 0, maxCol = 0;
+          ws.data.forEach((row, r) => {
+            if (row.length > maxCol) maxCol = row.length;
+            maxRow = r + 1;
+          });
+          let wsxml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>';
+          ws.data.forEach((row, r) => {
+            const rn = r + 1;
+            row.forEach((cell, c) => {
+              const cn = String.fromCharCode(65 + c);
+              const ref = `${cn}${rn}`;
+              if (typeof cell === 'number') {
+                wsxml += `<c r="${ref}"><v>${cell}</v></c>`;
+              } else {
+                const v = escapeXml(String(cell ?? ''));
+                wsxml += `<c r="${ref}" t="inlineStr"><is><t>${v}</t></is></c>`;
+              }
+            });
+          });
+          wsxml += '</sheetData></worksheet>';
+          files.push(zipEntry('xl/worksheets/sheet1.xml', strToUtf8(wsxml)));
+
+          // xl/styles.xml
+          const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts><font><sz val="11"/><color theme="1"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font></fonts><fills><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/></cellXfs></styleSheet>';
+          files.push(zipEntry('xl/styles.xml', strToUtf8(styles)));
+
+          const zip = buildZip(files);
+          const blob = new Blob([zip], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+        function escapeXml(s) {
+          return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        return { utils: { aoa_to_sheet: aoaToSheet, book_new: bookNew, book_append_sheet: bookAppendSheet }, writeFile };
+      })();
+    </script>
   </head>
-  <body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col font-sans">
-    
-    <!-- HEADER -->
-    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-30">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-lg shadow-emerald-950/50">
-            <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
+  <body>
+    <header class="header">
+      <div class="container header-inner">
+        <div class="logo">
+          <div class="logo-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
           </div>
           <div>
-            <div class="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-white tracking-tight">
-                Conversor CSV a Excel XLSX
-              </h1>
-              <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                <i data-lucide="sparkles" class="w-3 h-3"></i> España / ES
-              </span>
+            <div class="flex">
+              <strong>Conversor CSV a Excel XLSX</strong>
+              <span class="chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Offline</span>
             </div>
-            <p class="text-xs text-slate-400 hidden sm:block">
-              Conversión de fechas de nacimiento (36 ➔ 1936) y decimales (.0349 ➔ 0,0349)
-            </p>
+            <div class="muted" style="font-size:12px;">Fechas 19XX y decimales ES (coma)</div>
           </div>
         </div>
-
-        <div class="flex items-center gap-3">
-          <div class="flex items-center gap-1.5 text-xs text-slate-300 bg-slate-800/80 border border-slate-700/60 px-3 py-1.5 rounded-lg">
-            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
-            <span class="hidden md:inline font-medium">100% Local & Privado</span>
-            <span class="text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded flex items-center gap-1">
-              <i data-lucide="wifi-off" class="w-3 h-3 text-slate-400"></i> Offline
-            </span>
-          </div>
-
-          <button id="btnReset" class="hidden flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg transition-colors cursor-pointer">
-            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-            <span>Nuevo Archivo</span>
+        <div class="flex">
+          <button id="btnReset" class="btn btn-outline hidden">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            Nuevo archivo
           </button>
         </div>
       </div>
     </header>
 
-    <!-- MAIN CONTAINER -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      
-      <!-- STEP 1: FILE UPLOAD SECTION -->
-      <section id="uploadSection" class="block">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-4xl mx-auto my-6">
-          <div class="mb-6 text-center">
-            <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">
-              Convierte tu CSV a Excel Microsoft XLSX
-            </h2>
-            <p class="text-sm text-slate-300 max-w-2xl mx-auto">
-              Procesa tu CSV al instante en tu dispositivo. Transforma automáticamente fechas de nacimiento (<code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">12/04/36</code> ➔ <code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">12/04/1936</code>) y formatos numéricos españoles (<code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">.0349</code> ➔ <code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">0,0349</code> y <code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">0.43</code> ➔ <code class="text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded font-mono">0,43</code>).
-            </p>
-          </div>
+    <main class="container" style="padding: 24px 16px;">
+      <!-- Upload -->
+      <section id="uploadSection">
+        <div class="card" style="max-width: 800px; margin: 24px auto;">
+          <h2 class="center" style="margin-bottom:8px;">Convierte tu CSV a Excel (.xlsx)</h2>
+          <p class="muted center" style="font-size:13px; max-width: 700px; margin: 0 auto 16px;">
+            Todo ocurre en tu navegador. Detecta automáticamente fechas de nacimiento (36 ➜ 1936) y decimales (.0349 ➜ 0,0349).
+          </p>
 
-          <!-- Tabs -->
-          <div class="flex border-b border-slate-800 mb-6">
-            <button id="tabUploadBtn" class="pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-emerald-500 text-emerald-400 cursor-pointer">
-              <i data-lucide="upload" class="w-4 h-4"></i> Subir Archivo CSV
-            </button>
-            <button id="tabPasteBtn" class="pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer">
-              <i data-lucide="clipboard" class="w-4 h-4"></i> Pegar Texto CSV
-            </button>
-          </div>
-
-          <div id="errorAlert" class="hidden mb-6 p-3 bg-red-900/30 border border-red-700/50 rounded-xl text-red-300 text-xs flex items-center gap-2">
-            <i data-lucide="alert-circle" class="w-4 h-4 text-red-400 shrink-0"></i>
-            <span id="errorMessage"></span>
-          </div>
-
-          <!-- Tab Content: Dropzone -->
-          <div id="tabUploadContent" class="block">
-            <div id="dropzone" class="border-2 border-dashed border-slate-700/80 hover:border-slate-500 bg-slate-950/50 hover:bg-slate-950 rounded-2xl p-8 sm:p-12 text-center cursor-pointer transition-all">
-              <input type="file" id="fileInput" accept=".csv,.txt,.tsv" class="hidden" />
-              <div class="h-16 w-16 mx-auto mb-4 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400 shadow-lg">
-                <i data-lucide="upload-cloud" class="w-8 h-8"></i>
-              </div>
-              <p class="text-base font-semibold text-slate-200 mb-1">
-                Haz clic para seleccionar o arrastra tu archivo CSV aquí
-              </p>
-              <p class="text-xs text-slate-400 mb-4">
-                Soporta .csv, .txt y .tsv (separados por ;, ,, TAB o |)
-              </p>
-              <div class="inline-flex items-center gap-2 text-xs font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-4 py-2 rounded-xl">
-                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-                <span>Procesamiento 100% en tu navegador (sin servidor)</span>
-              </div>
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="fileInput" accept=".csv,.txt,.tsv" class="hidden" />
+            <div style="display:grid; place-items:center; margin-bottom:12px;">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             </div>
+            <div style="font-weight:700;">Haz clic o arrastra tu CSV aquí</div>
+            <div class="muted" style="font-size:12px; margin-top:4px;">.csv, .txt, .tsv – separadores: ; , TAB |</div>
           </div>
 
-          <!-- Tab Content: Paste -->
-          <div id="tabPasteContent" class="hidden space-y-4">
-            <textarea id="pasteTextarea" rows="8" placeholder="ID;Nombre;Fecha_Nacimiento;Sueldo_Hora&#10;1;Carlos Garcia;12/04/36;.0349&#10;2;Ana Rodriguez;12-04-36;0.43" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors"></textarea>
-            <button id="btnProcessPaste" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-lg shadow-emerald-950/50">
-              <i data-lucide="play" class="w-4 h-4"></i> Procesar Texto Pegado
+          <div class="mt-4 center">
+            <button id="btnLoadSample" class="btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              Cargar ejemplo
             </button>
-          </div>
-
-          <!-- Quick Sample Button -->
-          <div class="mt-8 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-2 text-xs text-slate-400">
-              <i data-lucide="file-text" class="w-4 h-4 text-slate-500"></i>
-              <span>¿Quieres probar la conversión inmediatamente?</span>
-            </div>
-            <button id="btnLoadSample" class="w-full sm:w-auto text-xs font-semibold text-emerald-400 hover:text-emerald-300 bg-slate-800 hover:bg-slate-700/80 border border-slate-700 px-4 py-2 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i>
-              <span>Cargar Ejemplo (Fechas 36 ➔ 1936 y Decimales .0349 ➔ 0,0349)</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- PWA Privacy Banner -->
-        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 my-8 text-xs text-slate-300">
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="flex items-start gap-3">
-              <div class="h-9 w-9 rounded-xl bg-emerald-950 border border-emerald-800/80 flex items-center justify-center text-emerald-400 shrink-0">
-                <i data-lucide="shield" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <h4 class="font-bold text-sm text-slate-100">Aplicación PWA Autocontenida (Local First)</h4>
-                <p class="text-slate-400 mt-0.5 leading-relaxed">
-                  Todo el archivo HTML contiene las herramientas de conversión necesarias. Tus datos permanecen en tu ordenador sin ser subidos a ningún servidor externo.
-                </p>
-              </div>
-            </div>
-            <div class="flex flex-wrap items-center gap-2 shrink-0 border-t md:border-t-0 pt-3 md:pt-0 border-slate-800">
-              <div class="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
-                <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
-                <span>Fechas: 12/04/36 ➔ 12/04/1936</span>
-              </div>
-              <div class="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
-                <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
-                <span>Decimales: .0349 ➔ 0,0349</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
 
-      <!-- STEP 2: CONVERSION WORKSPACE SECTION -->
+      <!-- Workspace -->
       <section id="workspaceSection" class="hidden">
-        
-        <!-- Metrics Stats -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex items-center gap-3">
-            <div class="h-10 w-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 shrink-0">
-              <i data-lucide="table" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <p class="text-xs font-semibold text-slate-400">Filas / Registros</p>
-              <p id="statRows" class="text-xl font-bold text-white">0</p>
-            </div>
+        <!-- Stats -->
+        <div class="grid grid-4" style="margin-bottom:16px;">
+          <div class="card">
+            <div class="muted" style="font-size:12px;">Filas</div>
+            <div id="statRows" style="font-size:20px; font-weight:800;">0</div>
           </div>
-
-          <div class="bg-slate-900 border border-indigo-900/40 rounded-2xl p-4 shadow-lg flex items-center gap-3">
-            <div class="h-10 w-10 rounded-xl bg-indigo-950/80 border border-indigo-800/60 flex items-center justify-center text-indigo-400 shrink-0">
-              <i data-lucide="calendar" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <p class="text-xs font-semibold text-indigo-300">Fechas Nac. (19XX)</p>
-              <p id="statBirthDates" class="text-xl font-bold text-indigo-200">0</p>
-            </div>
+          <div class="card">
+            <div class="muted" style="font-size:12px;">Fechas corregidas</div>
+            <div id="statBirthDates" style="font-size:20px; font-weight:800; color:#a5b4fc;">0</div>
           </div>
-
-          <div class="bg-slate-900 border border-emerald-900/40 rounded-2xl p-4 shadow-lg flex items-center gap-3">
-            <div class="h-10 w-10 rounded-xl bg-emerald-950/80 border border-emerald-800/60 flex items-center justify-center text-emerald-400 shrink-0">
-              <i data-lucide="binary" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <p class="text-xs font-semibold text-emerald-300">Decimales Coma ES</p>
-              <p id="statNumbers" class="text-xl font-bold text-emerald-200">0</p>
-            </div>
+          <div class="card">
+            <div class="muted" style="font-size:12px;">Decimales ES</div>
+            <div id="statNumbers" style="font-size:20px; font-weight:800; color:#6ee7b7;">0</div>
           </div>
-
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex items-center gap-3">
-            <div class="h-10 w-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-amber-400 shrink-0">
-              <i data-lucide="zap" class="w-5 h-5"></i>
-            </div>
-            <div>
-              <p class="text-xs font-semibold text-slate-400">Tiempo de Proceso</p>
-              <p id="statTime" class="text-xl font-bold text-white">0 ms</p>
-            </div>
+          <div class="card">
+            <div class="muted" style="font-size:12px;">Tiempo</div>
+            <div id="statTime" style="font-size:20px; font-weight:800;">0 ms</div>
           </div>
         </div>
 
-        <!-- Configuration Settings -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 mb-6 shadow-xl">
-          <div class="flex items-center gap-2 mb-4 text-slate-200 border-b border-slate-800 pb-3">
-            <i data-lucide="settings-2" class="w-5 h-5 text-emerald-400"></i>
-            <h3 class="font-semibold text-sm">Ajustes de Conversión</h3>
+        <!-- Opciones -->
+        <div class="card mb-4">
+          <div class="flex justify-between mb-2">
+            <strong style="font-size:14px;">Ajustes de conversión</strong>
           </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <!-- Delimiter -->
-            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-              <label class="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
-                <i data-lucide="file-code" class="w-3.5 h-3.5 text-emerald-400"></i> Separador CSV
-              </label>
-              <select id="selectDelimiter" class="w-full bg-slate-900 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 p-2 focus:outline-none focus:border-emerald-500">
-                <option value="auto">Auto-detectar</option>
-                <option value=";">Punto y coma ( ; ) - Estándar ES</option>
-                <option value=",">Coma ( , )</option>
-                <option value="&#9;">Tabulación ( TAB )</option>
-                <option value="|">Barra vertical ( | )</option>
+          <div class="grid grid-4">
+            <div>
+              <label class="muted" style="font-size:12px;">Separador</label>
+              <select id="selectDelimiter" class="select">
+                <option value="auto">Auto</option>
+                <option value=";">Punto y coma (;)</option>
+                <option value=",">Coma (,)</option>
+                <option value="&#9;">Tabulación</option>
+                <option value="|">Barra (|)</option>
               </select>
             </div>
-
-            <!-- Birth Date Century Rule -->
-            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-              <label class="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
-                <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-400"></i> Regla Fechas Nacimiento
-              </label>
-              <select id="selectCentury" class="w-full bg-slate-900 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 p-2 focus:outline-none focus:border-emerald-500">
-                <option value="19">Forzar 19XX para 2 dígitos (36 ➔ 1936)</option>
-                <option value="auto">Detección Inteligente</option>
+            <div>
+              <label class="muted" style="font-size:12px;">Fechas 2 dígitos</label>
+              <select id="selectCentury" class="select">
+                <option value="19">Forzar 19XX</option>
+                <option value="auto">Auto</option>
               </select>
             </div>
-
-            <!-- Number Output Mode -->
-            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-              <label class="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
-                <i data-lucide="binary" class="w-3.5 h-3.5 text-emerald-400"></i> Formato Decimal
-              </label>
-              <select id="selectNumberMode" class="w-full bg-slate-900 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 p-2 focus:outline-none focus:border-emerald-500">
-                <option value="spanish_string">Texto con coma española ("0,0349")</option>
-                <option value="excel_number">Número nativo Excel (0.0349)</option>
+            <div>
+              <label class="muted" style="font-size:12px;">Formato decimal</label>
+              <select id="selectNumberMode" class="select">
+                <option value="spanish_string">Texto "0,0349"</option>
+                <option value="excel_number">Número Excel 0.0349</option>
               </select>
             </div>
-
-            <!-- Header Toggle -->
-            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex flex-col justify-between">
-              <label class="block text-xs font-semibold text-slate-400 mb-1.5">Encabezados</label>
-              <button id="btnToggleHeader" type="button" class="w-full text-xs font-medium py-2 px-3 rounded-lg border bg-emerald-950/60 border-emerald-700/60 text-emerald-300 flex items-center justify-between cursor-pointer">
-                <span>Primera fila es cabecera</span>
-                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+            <div class="flex" style="align-items:flex-end;">
+              <button id="btnToggleHeader" class="btn btn-outline grow">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Primera fila es cabecera
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Column Classification Cards -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 mb-6 shadow-xl">
-          <div class="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-            <div class="flex items-center gap-2">
-              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
-              <h3 class="font-semibold text-sm text-slate-200">Detección de Columnas</h3>
-            </div>
-            <span class="text-xs text-slate-400">Puedes cambiar manualmente el tipo asignado a cada columna</span>
+        <!-- Columnas -->
+        <div class="card mb-4">
+          <div class="flex justify-between mb-2">
+            <strong style="font-size:14px;">Columnas detectadas</strong>
+            <span class="muted" style="font-size:12px;">Puedes cambiar el tipo manualmente</span>
           </div>
-          <div id="columnCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"></div>
+          <div id="columnCardsContainer" class="grid grid-4"></div>
         </div>
 
-        <!-- Preview & Export Table Card -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden mb-12">
-          <!-- Action bar -->
-          <div class="p-4 sm:p-6 bg-slate-900 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-              <div class="bg-slate-950 p-1 rounded-xl border border-slate-800 flex items-center">
-                <button id="btnViewConverted" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-emerald-600 text-white cursor-pointer shadow">
-                  <i data-lucide="eye" class="w-3.5 h-3.5"></i> Vista Convertida
-                </button>
-                <button id="btnViewDiff" class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-400 hover:text-slate-200 cursor-pointer">
-                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Comparador (Antes ➔ Después)
-                </button>
-              </div>
-            </div>
-
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div class="flex items-center bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5">
-                <span class="text-xs text-slate-400 mr-2 font-mono">Nombre:</span>
-                <input type="text" id="outputFilenameInput" value="datos_convertidos" class="bg-transparent text-xs font-medium text-slate-200 focus:outline-none w-36 sm:w-48 font-mono" />
-                <span class="text-xs text-emerald-400 font-mono font-bold">.xlsx</span>
-              </div>
-
-              <button id="btnDownloadXlsx" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/60 transition-colors cursor-pointer">
-                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Descargar Excel (.xlsx)
+        <!-- Tabla -->
+        <div class="card">
+          <div class="flex justify-between mb-2 flex-wrap">
+            <div class="flex">
+              <button id="btnViewConverted" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Vista convertida
               </button>
-
-              <button id="btnDownloadCsv" title="Descargar CSV con ;" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 border border-slate-700 transition-colors cursor-pointer">
-                <i data-lucide="file-text" class="w-3.5 h-3.5"></i> CSV (;)
+              <button id="btnViewDiff" class="btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Comparador
+              </button>
+            </div>
+            <div class="flex">
+              <input id="outputFilenameInput" class="input" value="datos_convertidos" style="width:180px;" />
+              <span class="chip">.xlsx</span>
+              <button id="btnDownloadXlsx" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Descargar XLSX
+              </button>
+              <button id="btnDownloadCsv" class="btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                CSV
               </button>
             </div>
           </div>
-
-          <!-- Search & Filter bar -->
-          <div class="px-4 py-3 bg-slate-950/60 border-b border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-            <div class="relative w-full sm:w-72">
-              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-              <input type="text" id="searchInput" placeholder="Buscar en la tabla..." class="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-slate-600" />
-            </div>
-
-            <div class="flex items-center justify-between w-full sm:w-auto gap-4">
-              <div id="tableRecordCount" class="text-slate-400">Mostrando datos...</div>
-            </div>
-          </div>
-
-          <!-- Table Container -->
-          <div class="overflow-x-auto max-h-[500px]">
-            <table class="w-full text-left border-collapse text-xs">
-              <thead id="tableHeader" class="bg-slate-950 text-slate-400 font-semibold sticky top-0 z-10"></thead>
-              <tbody id="tableBody" class="divide-y divide-slate-800/60 font-mono"></tbody>
+          <div class="table-wrap">
+            <table>
+              <thead id="tableHeader"></thead>
+              <tbody id="tableBody"></tbody>
             </table>
           </div>
         </div>
-
       </section>
-
     </main>
 
-    <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
-      <p>Conversor CSV a Excel XLSX • PWA Single File Local First • España</p>
+    <footer class="center muted" style="font-size:12px; padding: 16px;">
+      PWA single-file • Local first • España
     </footer>
 
-    <!-- SCRIPT APPLICATION LOGIC -->
     <script>
-      // Global State
+      // --- Estado global ---
       let rawCsvText = '';
       let currentFilename = 'datos.csv';
       let parsedHeaders = [];
       let parsedRawRows = [];
-      let detectedDelimiter = ';';
       let options = {
         delimiter: 'auto',
         hasHeader: true,
@@ -379,56 +578,102 @@
         numberOutputMode: 'spanish_string'
       };
       let columnTypes = {}; // index -> 'birth_date' | 'spanish_number' | 'text'
-      let viewMode = 'converted'; // 'converted' or 'diff'
+      let viewMode = 'converted';
       let searchTerm = '';
 
-      // Initialize Lucide Icons
-      document.addEventListener('DOMContentLoaded', () => {
-        lucide.createIcons();
-        setupEventListeners();
-      });
+      // --- Persistencia ---
+      (function loadPrefs() {
+        try {
+          const saved = localStorage.getItem('csv2xlsx_prefs');
+          if (saved) {
+            const p = JSON.parse(saved);
+            options = { ...options, ...p };
+            document.getElementById('selectDelimiter').value = options.delimiter;
+            document.getElementById('selectCentury').value = options.defaultBirthCentury;
+            document.getElementById('selectNumberMode').value = options.numberOutputMode;
+            const btn = document.getElementById('btnToggleHeader');
+            if (!options.hasHeader) {
+              btn.classList.remove('btn-primary');
+              btn.innerHTML = 'Sin cabecera';
+            }
+          }
+        } catch (e) {}
+      })();
 
-      // --- TRANSFORMATION ALGORITHMS ---
-      
-      /**
-       * Transform birth date strings: e.g. "12/04/36", "12-04-36", "12.04.36"
-       * Forces 2-digit years like '36' to '1936' (not '2036') for birth dates.
-       */
+      function savePrefs() {
+        try {
+          localStorage.setItem('csv2xlsx_prefs', JSON.stringify(options));
+        } catch (e) {}
+      }
+
+      // --- Algoritmos de transformación ---
+      const SPANISH_ENGLISH_MONTHS = {
+        'ENE': '01', 'ENERO': '01', 'JAN': '01', 'JANUARY': '01',
+        'FEB': '02', 'FEBRERO': '02', 'FEBRUARY': '02',
+        'MAR': '03', 'MARZO': '03', 'MARCH': '03',
+        'ABR': '04', 'ABRIL': '04', 'APR': '04', 'APRIL': '04',
+        'MAY': '05', 'MAYO': '05',
+        'JUN': '06', 'JUNIO': '06', 'JUNE': '06',
+        'JUL': '07', 'JULIO': '07', 'JULY': '07',
+        'AGO': '08', 'AGOSTO': '08', 'AUG': '08', 'AUGUST': '08',
+        'SEP': '09', 'SET': '09', 'SEPTIEMBRE': '09', 'SETIEMBRE': '09', 'SEPTEMBER': '09',
+        'OCT': '10', 'OCTUBRE': '10', 'OCTOBER': '10',
+        'NOV': '11', 'NOVIEMBRE': '11', 'NOVEMBER': '11',
+        'DIC': '12', 'DICIEMBRE': '12', 'DEC': '12', 'DECEMBER': '12'
+      };
+
       function transformBirthDate(val) {
         if (!val || typeof val !== 'string') return { transformed: val, wasModified: false };
         const trimmed = val.trim();
         if (!trimmed) return { transformed: val, wasModified: false };
 
-        // Match DD/MM/YY or DD-MM-YY or DD.MM.YY (with 2-digit year)
+        function getBirthYear(yStr) {
+          if (yStr.length === 4) return yStr;
+          const numY = parseInt(yStr, 10);
+          if (isNaN(numY)) return yStr;
+          if (options.defaultBirthCentury === '19') {
+            return `19${yStr.padStart(2, '0')}`;
+          } else {
+            const curYY = new Date().getFullYear() % 100;
+            return numY > curYY ? `19${yStr.padStart(2, '0')}` : `19${yStr.padStart(2, '0')}`;
+          }
+        }
+
+        const textMonthMatch = trimmed.match(/^(\d{1,2})([\/\-\.\s]+)([a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,10})\2(\d{2}|\d{4})$/);
+        if (textMonthMatch) {
+          const day = textMonthMatch[1].padStart(2, '0');
+          const monthRaw = textMonthMatch[3].toUpperCase();
+          const yearRaw = textMonthMatch[4];
+          const monthNum = SPANISH_ENGLISH_MONTHS[monthRaw] || SPANISH_ENGLISH_MONTHS[monthRaw.substring(0, 3)];
+          if (monthNum) {
+            const fullYear = getBirthYear(yearRaw);
+            const result = `${day}/${monthNum}/${fullYear}`;
+            return { transformed: result, wasModified: true };
+          }
+        }
+
         const match2Digit = trimmed.match(/^(\d{1,2})([\/\-\.])(\d{1,2})\2(\d{2})$/);
         if (match2Digit) {
           const day = match2Digit[1].padStart(2, '0');
-          const sep = match2Digit[2];
           const month = match2Digit[3].padStart(2, '0');
           const shortYear = match2Digit[4];
-          const fullYear = `19${shortYear}`;
-          const result = `${day}${sep}${month}${sep}${fullYear}`;
-          return { transformed: result, wasModified: result !== trimmed };
+          const fullYear = getBirthYear(shortYear);
+          const result = `${day}/${month}/${fullYear}`;
+          return { transformed: result, wasModified: true };
         }
 
-        // Match DD/MM/YYYY with 4-digit year
         const match4Digit = trimmed.match(/^(\d{1,2})([\/\-\.])(\d{1,2})\2(\d{4})$/);
         if (match4Digit) {
           const day = match4Digit[1].padStart(2, '0');
-          const sep = match4Digit[2];
           const month = match4Digit[3].padStart(2, '0');
           const year = match4Digit[4];
-          const result = `${day}${sep}${month}${sep}${year}`;
+          const result = `${day}/${month}/${year}`;
           return { transformed: result, wasModified: result !== trimmed };
         }
 
         return { transformed: trimmed, wasModified: false };
       }
 
-      /**
-       * Transform numeric values into Spanish comma decimal format:
-       * e.g., ".0349" ➔ "0,0349", "0.43" ➔ "0,43", ",0349" ➔ "0,0349"
-       */
       function transformSpanishNumber(val) {
         if (!val || typeof val !== 'string') return { transformed: val, numericVal: null, wasModified: false };
         const trimmed = val.trim();
@@ -437,36 +682,30 @@
         let normalized = trimmed;
         let wasModified = false;
 
-        // Case: Starts with dot e.g. ".0349" or "-.0349" -> "0.0349"
-        if (/^[-+]?\.\d+$/.test(normalized)) {
-          const sign = normalized.startsWith('-') ? '-' : normalized.startsWith('+') ? '+' : '';
-          const digits = normalized.replace(/^[-+]\./, '').replace(/^\./, '');
-          normalized = `${sign}0.${digits}`;
+        if (/^[-+]?\.\\d+$/.test(normalized)) {
+          const isNeg = normalized.startsWith('-');
+          const digits = normalized.replace(/^[-+]?\\./, '');
+          normalized = `${isNeg ? '-' : ''}0.${digits}`;
           wasModified = true;
-        }
-        // Case: Starts with comma e.g. ",0349" or "-,0349" -> "0,0349"
-        else if (/^[-+]?\,\d+$/.test(normalized)) {
-          const sign = normalized.startsWith('-') ? '-' : normalized.startsWith('+') ? '+' : '';
-          const digits = normalized.replace(/^[-+]\,/, '').replace(/^\,/, '');
-          normalized = `${sign}0,${digits}`;
+        } else if (/^[-+]?\\,\\d+$/.test(normalized)) {
+          const isNeg = normalized.startsWith('-');
+          const digits = normalized.replace(/^[-+]?\\,/, '');
+          normalized = `${isNeg ? '-' : ''}0,${digits}`;
           wasModified = true;
         }
 
-        // Dot decimal format e.g. 0.43 or 0.0349
-        if (/^[-+]?\d+\.\d+$/.test(normalized)) {
+        if (/^[-+]?\\d+\\.\\d+$/.test(normalized)) {
           const num = parseFloat(normalized);
           const spanishStr = normalized.replace('.', ',');
           return { transformed: spanishStr, numericVal: isNaN(num) ? null : num, wasModified: true };
         }
 
-        // Comma decimal format e.g. 0,43 or 0,0349
-        if (/^[-+]?\d+\,\d+$/.test(normalized)) {
+        if (/^[-+]?\\d+\\,\\d+$/.test(normalized)) {
           const num = parseFloat(normalized.replace(',', '.'));
           return { transformed: normalized, numericVal: isNaN(num) ? null : num, wasModified: wasModified };
         }
 
-        // Integers e.g. "42"
-        if (/^[-+]?\d+$/.test(normalized)) {
+        if (/^[-+]?\\d+$/.test(normalized)) {
           const num = parseInt(normalized, 10);
           return { transformed: normalized, numericVal: isNaN(num) ? null : num, wasModified: trimmed !== normalized };
         }
@@ -474,9 +713,6 @@
         return { transformed: trimmed, numericVal: null, wasModified: false };
       }
 
-      /**
-       * Detect column type from sample cell values
-       */
       function detectColumnType(sampleValues) {
         const clean = sampleValues.map(s => (s || '').trim()).filter(s => s.length > 0);
         if (clean.length === 0) return 'text';
@@ -485,9 +721,10 @@
         let numScore = 0;
 
         for (const val of clean) {
-          if (/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.](\d{2}|\d{4})$/.test(val)) {
+          if (/^\d{1,2}[\/\-\.]\d{1,2}[\/\-\.](\d{2}|\d{4})$/.test(val) ||
+              /^\d{1,2}[\/\-\.\s]+[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,10}[\/\-\.\s]+(\d{2}|\d{4})$/.test(val)) {
             birthScore++;
-          } else if (/^[-+]?(\.\d+|\,\d+|\d+\.\d+|\d+\,\d+)$/.test(val)) {
+          } else if (/^[-+]?(\.\\d+|\\,\\d+|\\d+\\.\\d+|\\d+\\,\\d+|\\d+)$/.test(val)) {
             numScore++;
           }
         }
@@ -498,75 +735,84 @@
         return 'text';
       }
 
-      /**
-       * CSV Delimiter Auto-Detection
-       */
-      function detectDelimiter(text) {
-        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-        if (lines.length === 0) return ';';
-        const candidates = [';', ',', '\t', '|'];
-        const firstLine = lines[0];
-        let best = ';';
-        let maxCount = -1;
-        for (const d of candidates) {
-          const count = (firstLine.split(d).length - 1);
-          if (count > maxCount) {
-            maxCount = count;
-            best = d;
-          }
-        }
-        return best;
-      }
-
-      /**
-       * CSV Parser
-       */
-      function parseCsv(rawText, delim) {
-        const text = rawText.replace(/^\uFEFF/, '');
-        const actualDelim = delim === 'auto' ? detectDelimiter(text) : delim;
-        detectedDelimiter = actualDelim;
-
-        const rows = [];
-        let currentRow = [];
-        let currentToken = '';
-        let insideQuotes = false;
-
-        for (let i = 0; i < text.length; i++) {
-          const char = text[i];
-          const nextChar = text[i + 1];
-
-          if (insideQuotes) {
-            if (char === '"') {
-              if (nextChar === '"') {
-                currentToken += '"';
+      function tokenizeLine(lineText, delim) {
+        const tokens = [];
+        let token = '';
+        let inQuotes = false;
+        for (let i = 0; i < lineText.length; i++) {
+          const ch = lineText[i];
+          const next = lineText[i + 1];
+          if (inQuotes) {
+            if (ch === '"') {
+              if (next === '"') {
+                token += '"';
                 i++;
               } else {
-                insideQuotes = false;
+                inQuotes = false;
               }
             } else {
-              currentToken += char;
+              token += ch;
             }
           } else {
-            if (char === '"') {
-              insideQuotes = true;
-            } else if (char === actualDelim) {
-              currentRow.push(currentToken.trim());
-              currentToken = '';
-            } else if (char === '\r' || char === '\n') {
-              if (char === '\r' && nextChar === '\n') i++;
-              currentRow.push(currentToken.trim());
-              if (currentRow.some(c => c.length > 0)) rows.push(currentRow);
-              currentRow = [];
-              currentToken = '';
+            if (ch === '"') {
+              inQuotes = true;
+            } else if (ch === delim) {
+              tokens.push(token.trim());
+              token = '';
             } else {
-              currentToken += char;
+              token += ch;
+            }
+          }
+        }
+        tokens.push(token.trim());
+        return tokens;
+      }
+
+      function parseCsvLine(lineText, forceDelim, expectedColsCount) {
+        if (!lineText) return [];
+        if (forceDelim !== 'auto') {
+          return tokenizeLine(lineText, forceDelim);
+        }
+
+        const candidates = [';', ',', '\t', '|'];
+        if (expectedColsCount > 0) {
+          for (const d of candidates) {
+            const tokens = tokenizeLine(lineText, d);
+            if (tokens.length === expectedColsCount) {
+              return tokens;
             }
           }
         }
 
-        if (currentToken || currentRow.length > 0) {
-          currentRow.push(currentToken.trim());
-          if (currentRow.some(c => c.length > 0)) rows.push(currentRow);
+        let bestDelim = ';';
+        let maxCols = 0;
+        for (const d of candidates) {
+          const tokens = tokenizeLine(lineText, d);
+          if (tokens.length > maxCols) {
+            maxCols = tokens.length;
+            bestDelim = d;
+          }
+        }
+        return tokenizeLine(lineText, bestDelim);
+      }
+
+      function parseCsv(rawText, delim) {
+        const text = rawText.replace(/^\uFEFF/, '');
+        const rawLines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+        if (rawLines.length === 0) return { headers: [], rows: [] };
+
+        const rows = [];
+        let expectedCols = 0;
+
+        for (let i = 0; i < rawLines.length; i++) {
+          const line = rawLines[i];
+          const tokens = parseCsvLine(line, delim, expectedCols);
+          if (i === 0) {
+            expectedCols = tokens.length;
+          }
+          if (tokens.some(t => t.length > 0)) {
+            rows.push(tokens);
+          }
         }
 
         if (rows.length === 0) return { headers: [], rows: [] };
@@ -586,8 +832,7 @@
         return { headers, rows: dataRows };
       }
 
-      // --- PROCESS & RENDER WORKSPACE ---
-
+      // --- Render y lógica ---
       function processAndRender() {
         if (!rawCsvText) return;
 
@@ -596,7 +841,6 @@
         parsedHeaders = parsed.headers;
         parsedRawRows = parsed.rows;
 
-        // Auto detect column types if not set
         parsedHeaders.forEach((_, cIdx) => {
           if (!columnTypes[cIdx]) {
             const samples = parsedRawRows.slice(0, 25).map(r => r[cIdx] || '');
@@ -604,7 +848,6 @@
           }
         });
 
-        // Execute transformations
         let birthDatesCount = 0;
         let numbersCount = 0;
 
@@ -637,19 +880,14 @@
         const endTime = performance.now();
         const duration = Math.max(1, Math.round(endTime - startTime));
 
-        // Render Stats
         document.getElementById('statRows').textContent = transformedRows.length.toLocaleString('es-ES');
         document.getElementById('statBirthDates').textContent = birthDatesCount.toLocaleString('es-ES');
         document.getElementById('statNumbers').textContent = numbersCount.toLocaleString('es-ES');
         document.getElementById('statTime').textContent = `${duration} ms`;
 
-        // Render Column Settings Cards
         renderColumnCards();
-
-        // Render Table Data
         renderTable(transformedRows);
 
-        // Store active transformed rows globally
         window.activeTransformedRows = transformedRows;
       }
 
@@ -659,28 +897,19 @@
 
         parsedHeaders.forEach((colName, cIdx) => {
           const currentType = columnTypes[cIdx] || 'text';
-
           const card = document.createElement('div');
-          card.className = 'bg-slate-950 border border-slate-800 p-3 rounded-xl flex flex-col justify-between';
-
+          card.className = 'card';
           card.innerHTML = `
-            <div class="mb-2">
-              <div class="flex items-center justify-between gap-1 mb-1">
-                <span class="text-xs font-bold text-slate-200 truncate" title="${colName}">${colName}</span>
-                <span class="text-[10px] font-mono text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded">Col ${cIdx + 1}</span>
-              </div>
-            </div>
-            <select data-col="${cIdx}" class="colTypeSelect w-full bg-slate-900 border border-slate-800 rounded-lg text-xs font-medium text-slate-300 p-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer">
-              <option value="birth_date" ${currentType === 'birth_date' ? 'selected' : ''}>🎂 Fecha Nac. (36 ➔ 1936)</option>
-              <option value="spanish_number" ${currentType === 'spanish_number' ? 'selected' : ''}>🔢 Número ES (.0349 ➔ 0,0349)</option>
-              <option value="text" ${currentType === 'text' ? 'selected' : ''}>🔤 Texto Sin Cambios</option>
+            <div style="font-size:12px; font-weight:700; margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escapeHtml(colName)}">${escapeHtml(colName)}</div>
+            <select data-col="${cIdx}" class="colTypeSelect select">
+              <option value="birth_date" ${currentType === 'birth_date' ? 'selected' : ''}>🎂 Fecha Nac. (36 ➜ 1936)</option>
+              <option value="spanish_number" ${currentType === 'spanish_number' ? 'selected' : ''}>🔢 Número ES (.0349 ➜ 0,0349)</option>
+              <option value="text" ${currentType === 'text' ? 'selected' : ''}>🔤 Texto sin cambios</option>
             </select>
           `;
-
           container.appendChild(card);
         });
 
-        // Add change listeners
         document.querySelectorAll('.colTypeSelect').forEach(select => {
           select.addEventListener('change', (e) => {
             const colIdx = parseInt(e.target.getAttribute('data-col'), 10);
@@ -694,20 +923,17 @@
         const thead = document.getElementById('tableHeader');
         const tbody = document.getElementById('tableBody');
 
-        // Render Header
-        let headerHtml = '<tr><th class="p-3 border-b border-slate-800 w-12 text-center text-slate-500 font-mono">#</th>';
+        let headerHtml = '<tr><th class="w-12 text-center">#</th>';
         parsedHeaders.forEach((h, cIdx) => {
           const colType = columnTypes[cIdx];
           let badge = '';
-          if (colType === 'birth_date') badge = '<span class="text-[10px] text-indigo-400 bg-indigo-950 px-1.5 py-0.5 rounded ml-1.5">19XX</span>';
-          if (colType === 'spanish_number') badge = '<span class="text-[10px] text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded ml-1.5">0,00</span>';
-
-          headerHtml += `<th class="p-3 border-b border-slate-800 font-bold text-slate-200"><div class="flex items-center">${h}${badge}</div></th>`;
+          if (colType === 'birth_date') badge = ' <span class="badge badge-indigo">19XX</span>';
+          if (colType === 'spanish_number') badge = ' <span class="badge badge-emerald">0,00</span>';
+          headerHtml += `<th>${escapeHtml(h)}${badge}</th>`;
         });
         headerHtml += '</tr>';
         thead.innerHTML = headerHtml;
 
-        // Filter rows
         let rowsToDisplay = transformedRows;
         if (searchTerm.trim()) {
           const term = searchTerm.toLowerCase();
@@ -716,71 +942,53 @@
           );
         }
 
-        document.getElementById('tableRecordCount').textContent = `Mostrando ${rowsToDisplay.length} registros`;
-
-        // Render Body
         if (rowsToDisplay.length === 0) {
-          tbody.innerHTML = `<tr><td colSpan="${parsedHeaders.length + 1}" class="p-8 text-center text-slate-500 italic">No se encontraron resultados</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="${parsedHeaders.length + 1}" class="center muted">No hay resultados</td></tr>`;
           return;
         }
 
         let bodyHtml = '';
-        rowsToDisplay.slice(0, 100).forEach((row) => {
-          bodyHtml += `<tr class="hover:bg-slate-800/40 transition-colors">`;
-          bodyHtml += `<td class="p-3 text-center text-slate-500 font-sans text-[11px]">${row.rowIndex + 1}</td>`;
-
+        rowsToDisplay.slice(0, 200).forEach((row) => {
+          bodyHtml += `<tr><td class="center muted">${row.rowIndex + 1}</td>`;
           row.cells.forEach((cell) => {
             if (viewMode === 'converted') {
-              const bgClass = cell.wasModified
+              const cls = cell.wasModified
                 ? cell.type === 'birth_date'
-                  ? 'bg-indigo-950/30 text-indigo-200 font-semibold border-l-2 border-indigo-500'
-                  : 'bg-emerald-950/30 text-emerald-200 font-semibold border-l-2 border-emerald-500'
-                : 'text-slate-300';
-
-              bodyHtml += `<td class="p-3 ${bgClass}">${escapeHtml(cell.transformed)}</td>`;
+                  ? 'bg-indigo-950/30 text-indigo-200 font-semibold'
+                  : 'bg-emerald-950/30 text-emerald-200 font-semibold'
+                : '';
+              bodyHtml += `<td class="${cls}">${escapeHtml(cell.transformed)}</td>`;
             } else {
-              // Diff View
               if (cell.wasModified) {
-                const badgeClass = cell.type === 'birth_date'
-                  ? 'bg-indigo-950 text-indigo-300 border-indigo-800'
-                  : 'bg-emerald-950 text-emerald-300 border-emerald-800';
-
-                bodyHtml += `<td class="p-3">
-                  <div class="flex items-center gap-1.5 text-[11px]">
-                    <span class="line-through text-slate-500 bg-slate-950 px-1 py-0.5 rounded">${escapeHtml(cell.original)}</span>
-                    <i data-lucide="arrow-right" class="w-3 h-3 text-emerald-400"></i>
-                    <span class="font-bold px-1.5 py-0.5 rounded border ${badgeClass}">${escapeHtml(cell.transformed)}</span>
+                const badgeClass = cell.type === 'birth_date' ? 'badge-indigo' : 'badge-emerald';
+                bodyHtml += `<td>
+                  <div style="display:flex; gap:6px; align-items:center; font-size:11px;">
+                    <span class="muted" style="text-decoration:line-through;">${escapeHtml(cell.original)}</span>
+                    <span>➜</span>
+                    <span class="badge ${badgeClass}">${escapeHtml(cell.transformed)}</span>
                   </div>
                 </td>`;
               } else {
-                bodyHtml += `<td class="p-3 text-slate-400">${escapeHtml(cell.transformed)}</td>`;
+                bodyHtml += `<td class="muted">${escapeHtml(cell.transformed)}</td>`;
               }
             }
           });
-
           bodyHtml += `</tr>`;
         });
 
         tbody.innerHTML = bodyHtml;
-        lucide.createIcons();
       }
 
       function escapeHtml(str) {
         return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       }
 
-      // --- EXPORT FUNCTIONALITY ---
-
+      // --- Export ---
       function downloadXlsx() {
         if (!window.activeTransformedRows || window.activeTransformedRows.length === 0) return;
 
-        const wb = XLSX.utils.book_new();
         const matrix = [];
-
-        // Header
         matrix.push(parsedHeaders);
-
-        // Rows
         window.activeTransformedRows.forEach(row => {
           const rowVals = row.cells.map(cell => {
             if (cell.type === 'spanish_number' && options.numberOutputMode === 'excel_number') {
@@ -794,19 +1002,8 @@
         });
 
         const ws = XLSX.utils.aoa_to_sheet(matrix);
-
-        // Auto Column Widths
-        const colWidths = parsedHeaders.map((header, cIdx) => {
-          let maxLen = header ? header.length : 10;
-          window.activeTransformedRows.slice(0, 100).forEach(r => {
-            const val = r.cells[cIdx] ? r.cells[cIdx].transformed : '';
-            if (val && val.length > maxLen) maxLen = val.length;
-          });
-          return { wch: Math.min(Math.max(maxLen + 3, 12), 40) };
-        });
-        ws['!cols'] = colWidths;
-
-        XLSX.utils.book_append_sheet(wb, ws, 'Datos Convertidos');
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Datos');
 
         const outName = document.getElementById('outputFilenameInput').value.trim() || 'datos_convertidos';
         const finalName = outName.endsWith('.xlsx') ? outName : `${outName}.xlsx`;
@@ -817,170 +1014,117 @@
         if (!window.activeTransformedRows || window.activeTransformedRows.length === 0) return;
 
         const lines = [];
-        lines.push(parsedHeaders.map(h => `"${h.replace(/"/g, '""')}"`).join(';'));
-
+        lines.push(parsedHeaders.map(h => `"${String(h ?? '').replace(/"/g, '""')}"`).join(';'));
         window.activeTransformedRows.forEach(row => {
-          const rowStr = row.cells.map(c => `"${(c.transformed || '').replace(/"/g, '""')}"`).join(';');
+          const rowStr = row.cells.map(c => `"${String(c.transformed ?? '').replace(/"/g, '""')}"`).join(';');
           lines.push(rowStr);
         });
 
         const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
+        const a = document.createElement('a');
+        a.href = url;
         const outName = document.getElementById('outputFilenameInput').value.trim() || 'datos_convertidos';
-        link.download = `${outName}.csv`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        a.download = `${outName}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       }
 
-      // --- EVENT LISTENERS ---
+      // --- Event listeners ---
+      const fileInput = document.getElementById('fileInput');
+      const dropzone = document.getElementById('dropzone');
 
-      function setupEventListeners() {
-        const fileInput = document.getElementById('fileInput');
-        const dropzone = document.getElementById('dropzone');
+      dropzone.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleFile(file);
+      });
 
-        dropzone.addEventListener('click', () => fileInput.click());
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('drag');
+      });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('drag');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+      });
 
-        fileInput.addEventListener('change', (e) => {
-          const file = e.target.files[0];
-          if (file) handleFile(file);
-        });
+      document.getElementById('btnLoadSample').addEventListener('click', () => {
+        const sample = [
+          'ID,Nombre,Fecha_Nacimiento,Ratio_Importe,Tasa_Factor,Ciudad',
+          '1;Carlos Garcia;12-OCT-46;0.001;.444;Madrid',
+          '2;Ana Rodriguez;12-ENE-52;.33;0,0349;Barcelona',
+          '3;Jose Lopez;25-MAR-38;12.50;.875;Valencia',
+          '4;Maria Fernandez;05-SEP-55;0.001;1.25;Sevilla',
+          '5;David Martin;18-AGO-72;.0890;.65;Bilbao',
+          '6;Elena Gomez;30-10-85;22.10;0.92;Zaragoza',
+          '7;Javier Ruiz;01-DIC-99;,0349;0,43;Malaga',
+          '8;Lucia Diaz;14-JUN-05;18.00;.999;Alicante'
+        ].join('\n');
+        currentFilename = 'ejemplo.csv';
+        loadTextAndSwitchWorkspace(sample);
+      });
 
-        dropzone.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          dropzone.classList.add('border-emerald-500', 'bg-emerald-950/20');
-        });
+      document.getElementById('btnReset').addEventListener('click', () => {
+        rawCsvText = '';
+        columnTypes = {};
+        document.getElementById('uploadSection').classList.remove('hidden');
+        document.getElementById('workspaceSection').classList.add('hidden');
+        document.getElementById('btnReset').classList.add('hidden');
+      });
 
-        dropzone.addEventListener('dragleave', (e) => {
-          e.preventDefault();
-          dropzone.classList.remove('border-emerald-500', 'bg-emerald-950/20');
-        });
+      document.getElementById('selectDelimiter').addEventListener('change', (e) => {
+        options.delimiter = e.target.value;
+        savePrefs();
+        processAndRender();
+      });
 
-        dropzone.addEventListener('drop', (e) => {
-          e.preventDefault();
-          dropzone.classList.remove('border-emerald-500', 'bg-emerald-950/20');
-          const file = e.dataTransfer.files[0];
-          if (file) handleFile(file);
-        });
+      document.getElementById('selectCentury').addEventListener('change', (e) => {
+        options.defaultBirthCentury = e.target.value;
+        savePrefs();
+        processAndRender();
+      });
 
-        // Tabs
-        const tabUploadBtn = document.getElementById('tabUploadBtn');
-        const tabPasteBtn = document.getElementById('tabPasteBtn');
-        const tabUploadContent = document.getElementById('tabUploadContent');
-        const tabPasteContent = document.getElementById('tabPasteContent');
+      document.getElementById('selectNumberMode').addEventListener('change', (e) => {
+        options.numberOutputMode = e.target.value;
+        savePrefs();
+        processAndRender();
+      });
 
-        tabUploadBtn.addEventListener('click', () => {
-          tabUploadBtn.className = 'pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-emerald-500 text-emerald-400 cursor-pointer';
-          tabPasteBtn.className = 'pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer';
-          tabUploadContent.classList.remove('hidden');
-          tabPasteContent.classList.add('hidden');
-        });
+      document.getElementById('btnToggleHeader').addEventListener('click', () => {
+        options.hasHeader = !options.hasHeader;
+        savePrefs();
+        const btn = document.getElementById('btnToggleHeader');
+        if (options.hasHeader) {
+          btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Primera fila es cabecera';
+        } else {
+          btn.innerHTML = 'Sin cabecera';
+        }
+        processAndRender();
+      });
 
-        tabPasteBtn.addEventListener('click', () => {
-          tabPasteBtn.className = 'pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-emerald-500 text-emerald-400 cursor-pointer';
-          tabUploadBtn.className = 'pb-3 px-4 font-medium text-sm flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 cursor-pointer';
-          tabPasteContent.classList.remove('hidden');
-          tabUploadContent.classList.add('hidden');
-        });
+      document.getElementById('btnViewConverted').addEventListener('click', () => {
+        viewMode = 'converted';
+        processAndRender();
+      });
 
-        // Process Paste Button
-        document.getElementById('btnProcessPaste').addEventListener('click', () => {
-          const text = document.getElementById('pasteTextarea').value;
-          if (!text.trim()) return showRuleError('Por favor pega texto en formato CSV.');
-          currentFilename = 'texto_pegado.csv';
-          loadTextAndSwitchWorkspace(text);
-        });
+      document.getElementById('btnViewDiff').addEventListener('click', () => {
+        viewMode = 'diff';
+        processAndRender();
+      });
 
-        // Load Sample
-        document.getElementById('btnLoadSample').addEventListener('click', () => {
-          const sample = [
-            'ID;Nombre;Fecha_Nacimiento;Sueldo_Hora;Ratio_Productividad;Ciudad',
-            '1;Carlos Garcia;12/04/36;.0349;0.43;Madrid',
-            '2;Ana Rodriguez;12-04-36;12.50;.875;Barcelona',
-            '3;Jose Lopez;25/11/48;0.0349;0,43;Valencia',
-            '4;Maria Fernandez;05-09-55;15.75;1.25;Sevilla',
-            '5;David Martin;18/02/72;.0890;.65;Bilbao',
-            '6;Elena Gomez;30-10-85;22.10;0.92;Zaragoza',
-            '7;Javier Ruiz;01/01/99;,0349;0,43;Malaga',
-            '8;Lucia Diaz;14/06/05;18.00;.999;Alicante'
-          ].join('\n');
-          currentFilename = 'ejemplo_fechas_y_numeros.csv';
-          loadTextAndSwitchWorkspace(sample);
-        });
-
-        // Reset
-        document.getElementById('btnReset').addEventListener('click', () => {
-          rawCsvText = '';
-          columnTypes = {};
-          document.getElementById('uploadSection').classList.remove('hidden');
-          document.getElementById('workspaceSection').classList.add('hidden');
-          document.getElementById('btnReset').classList.add('hidden');
-        });
-
-        // Options
-        document.getElementById('selectDelimiter').addEventListener('change', (e) => {
-          options.delimiter = e.target.value;
-          processAndRender();
-        });
-
-        document.getElementById('selectCentury').addEventListener('change', (e) => {
-          options.defaultBirthCentury = e.target.value;
-          processAndRender();
-        });
-
-        document.getElementById('selectNumberMode').addEventListener('change', (e) => {
-          options.numberOutputMode = e.target.value;
-          processAndRender();
-        });
-
-        document.getElementById('btnToggleHeader').addEventListener('click', () => {
-          options.hasHeader = !options.hasHeader;
-          const btn = document.getElementById('btnToggleHeader');
-          if (options.hasHeader) {
-            btn.className = 'w-full text-xs font-medium py-2 px-3 rounded-lg border bg-emerald-950/60 border-emerald-700/60 text-emerald-300 flex items-center justify-between cursor-pointer';
-            btn.innerHTML = `<span>Primera fila es cabecera</span><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>`;
-          } else {
-            btn.className = 'w-full text-xs font-medium py-2 px-3 rounded-lg border bg-slate-900 border-slate-700 text-slate-400 flex items-center justify-between cursor-pointer';
-            btn.innerHTML = `<span>Sin cabecera</span>`;
-          }
-          lucide.createIcons();
-          processAndRender();
-        });
-
-        // View Mode Toggle
-        const btnViewConverted = document.getElementById('btnViewConverted');
-        const btnViewDiff = document.getElementById('btnViewDiff');
-
-        btnViewConverted.addEventListener('click', () => {
-          viewMode = 'converted';
-          btnViewConverted.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-emerald-600 text-white cursor-pointer shadow';
-          btnViewDiff.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-400 hover:text-slate-200 cursor-pointer';
-          renderTable(window.activeTransformedRows);
-        });
-
-        btnViewDiff.addEventListener('click', () => {
-          viewMode = 'diff';
-          btnViewDiff.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 bg-indigo-600 text-white cursor-pointer shadow';
-          btnViewConverted.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 text-slate-400 hover:text-slate-200 cursor-pointer';
-          renderTable(window.activeTransformedRows);
-        });
-
-        // Search
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-          searchTerm = e.target.value;
-          renderTable(window.activeTransformedRows);
-        });
-
-        // Download
-        document.getElementById('btnDownloadXlsx').addEventListener('click', downloadXlsx);
-        document.getElementById('btnDownloadCsv').addEventListener('click', downloadCsv);
-      }
+      document.getElementById('btnDownloadXlsx').addEventListener('click', downloadXlsx);
+      document.getElementById('btnDownloadCsv').addEventListener('click', downloadCsv);
 
       function handleFile(file) {
         if (!file.name.match(/\.(csv|txt|tsv)$/i)) {
-          return showRuleError('Por favor selecciona un archivo .csv, .txt o .tsv');
+          alert('Por favor selecciona un archivo .csv, .txt o .tsv');
+          return;
         }
         currentFilename = file.name;
         const reader = new FileReader();
@@ -1001,12 +1145,6 @@
         document.getElementById('btnReset').classList.remove('hidden');
 
         processAndRender();
-      }
-
-      function showRuleError(msg) {
-        const errorAlert = document.getElementById('errorAlert');
-        document.getElementById('errorMessage').textContent = msg;
-        errorAlert.classList.remove('hidden');
       }
     </script>
   </body>
